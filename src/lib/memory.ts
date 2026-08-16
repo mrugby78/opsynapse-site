@@ -1,6 +1,3 @@
-import { mkdir, readFile, writeFile } from 'node:fs/promises';
-import { dirname } from 'node:path';
-
 export interface ReplyMemory {
   preferredTone?: 'written' | 'oral';
   preferredChannel?: 'email' | 'sms' | 'whatsapp';
@@ -11,9 +8,9 @@ export interface ReplyMemory {
   }>;
 }
 
-const memoryPath = process.env.REPLY_MEMORY_PATH || './data/reply-memory.json';
-
-const defaultMemory: ReplyMemory = {
+// Store en mémoire de session (compatible déploiement sans disque persisté,
+// type Cloudflare Pages). La persistance disque n'est pas garantie dans ce contexte.
+const store: ReplyMemory = {
   preferredTone: 'written',
   preferredStyle: 'balanced',
   learnedExamples: [],
@@ -31,27 +28,18 @@ function inferStyle(output: string): ReplyMemory['preferredStyle'] {
   return 'balanced';
 }
 
-async function ensureDir(filePath: string) {
-  await mkdir(dirname(filePath), { recursive: true });
-}
-
 export async function loadMemory(): Promise<ReplyMemory> {
-  try {
-    const raw = await readFile(memoryPath, 'utf8');
-    const parsed = JSON.parse(raw) as ReplyMemory;
-    return {
-      ...defaultMemory,
-      ...parsed,
-      learnedExamples: parsed.learnedExamples ?? [],
-    };
-  } catch {
-    return { ...defaultMemory };
-  }
+  return {
+    ...store,
+    learnedExamples: store.learnedExamples ?? [],
+  };
 }
 
 export async function saveMemory(memory: ReplyMemory): Promise<void> {
-  await ensureDir(memoryPath);
-  await writeFile(memoryPath, `${JSON.stringify(memory, null, 2)}\n`, 'utf8');
+  store.preferredTone = memory.preferredTone ?? store.preferredTone;
+  store.preferredChannel = memory.preferredChannel ?? store.preferredChannel;
+  store.preferredStyle = memory.preferredStyle ?? store.preferredStyle;
+  store.learnedExamples = memory.learnedExamples ?? store.learnedExamples ?? [];
 }
 
 export async function recordExample(input: string, output: string): Promise<void> {
@@ -81,7 +69,7 @@ export async function updateMemory(patch: Partial<ReplyMemory>): Promise<ReplyMe
   const next: ReplyMemory = {
     ...memory,
     ...patch,
-    learnedExamples: patch.learnedExamples ?? memory.learnedExamples ?? [],
+    learnedExamples: patch.learnedExamples ?? (memory.learnedExamples ?? []),
   };
 
   await saveMemory(next);
