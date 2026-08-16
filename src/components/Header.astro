@@ -1,0 +1,28 @@
+---
+import { ui } from '../i18n/ui';
+interface Props { lang: 'fr' | 'en'; page: string; }
+const { lang, page } = Astro.props;
+const t = (k: string) => ui[lang][k as keyof typeof ui.fr] ?? k;
+const nav = [
+  { key: 'home', path: lang === 'en' ? '/en' : '/', label: t('nav.home') },
+  { key: 'method', path: '/method', label: t('nav.method') },
+  { key: 'tools', path: '/tools', label: t('nav.tools') },
+  { key: 'about', path: lang === 'en' ? '/en/about' : '/parcours', label: t('nav.about') },
+  { key: 'contact', path: lang === 'en' ? '/en/contact' : '/contact', label: t('nav.contact') },
+];
+const switchLink = lang === 'en' ? Astro.url.pathname.replace('/en', '') : '/en' + Astro.url.pathname;
+---
+<header>
+  <div class="container header-inner">
+    <div class="brand"><a href={lang === 'en' ? '/en' : '/'}>{t('site.name')}</a></div>
+    <nav>
+      <ul>
+        {nav.map(item => <li><a href={item.path} class={item.key === page ? 'active' : ''}>{item.label}</a></li>)}
+      </ul>
+    </nav>
+    <div class="lang">
+      <a href={lang === 'fr' ? Astro.url.pathname : '/'} class={lang === 'fr' ? 'active' : ''}>FR</a>
+      <a href={lang === 'en' ? Astro.url.pathname : '/en' + Astro.url.pathname} class={lang === 'en' ? 'active' : ''}>EN</a>
+    </div>
+  </div>
+</header>

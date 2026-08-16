@@ -1,0 +1,60 @@
+---
+import Base from '../../layouts/Base.astro';
+import { ui } from '../../i18n/ui';
+const lang = 'en';
+const t = (k: string) => ui[lang][k as keyof typeof ui.en] ?? k;
+---
+<Base lang={lang} page="home">
+  <section class="hero">
+    <div class="container hero-inner">
+      <div>
+        <span class="hero-tag">{t('site.tagline')}</span>
+        <h1>{t('hero.title')}</h1>
+        <p class="sub">{t('hero.subtitle')}</p>
+        <div class="hero-cta">
+          <a class="btn btn-primary" href="/en/about">{t('hero.cta')}</a>
+          <a class="btn btn-ghost" href="/en/contact">{t('hero.cta2')}</a>
+        </div>
+      </div>
+      <img src="/romain.jpg" alt="Romain Pinsard" class="portrait" />
+    </div>
+  </section>
+
+  <section>
+    <div class="container">
+      <div class="about-grid">
+        <div>
+          <h2>{t('home.about.title')}</h2>
+          <div class="about-text">
+            <p>{t('home.about.p1')}</p>
+            <p>{t('home.about.p2')}</p>
+          </div>
+        </div>
+        <div>
+          <h2>{t('home.positioning.title')}</h2>
+          <p style="color:var(--text-dim)">{t('home.positioning.text')}</p>
+          <div class="pills">
+            <span class="pill">Customer Success</span>
+            <span class="pill">Operations</span>
+            <span class="pill">Management</span>
+            <span class="pill">Fintech</span>
+            <span class="pill">AI & Automation</span>
+            <span class="pill">Scale-up</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="container">
+      <h2>{t('home.stats.title')}</h2>
+      <div class="stats">
+        <div class="stat"><div class="num">-14 → 45</div><div class="label">{t('home.stats.nps')}</div></div>
+        <div class="stat"><div class="num">×4.5</div><div class="label">{t('home.stats.volume')}</div></div>
+        <div class="stat"><div class="num">12+</div><div class="label">{t('home.stats.team')}</div></div>
+        <div class="stat"><div class="num">~80h/wk</div><div class="label">{t('home.stats.support')}</div></div>
+      </div>
+    </div>
+  </section>
+</Base>

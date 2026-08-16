@@ -1,0 +1,524 @@
+---
+---
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>Assistant réponse</title>
+    <meta name="description" content="Assistant mobile pour écrire une bonne réponse à partir d'un message et d'un contexte." />
+    <style>
+      :root {
+        color-scheme: light;
+        --bg: #f6f1e8;
+        --card: rgba(255, 255, 255, 0.84);
+        --card-strong: rgba(255, 255, 255, 0.96);
+        --text: #1b1410;
+        --muted: #77695f;
+        --line: rgba(27, 20, 16, 0.08);
+        --accent: #5b61ff;
+        --accent-2: #0f766e;
+        --shadow: 0 24px 90px rgba(48, 29, 18, 0.12);
+      }
+
+      * { box-sizing: border-box; }
+      html, body { margin: 0; min-height: 100%; }
+
+      body {
+        font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        color: var(--text);
+        background:
+          radial-gradient(circle at top, rgba(91, 97, 255, 0.14), transparent 28%),
+          linear-gradient(180deg, #fbf8f2 0%, var(--bg) 100%);
+      }
+
+      main {
+        min-height: 100dvh;
+        padding: 14px 14px 110px;
+      }
+
+      .shell {
+        max-width: 640px;
+        margin: 0 auto;
+      }
+
+      .topbar {
+        display: flex;
+        justify-content: space-between;
+        gap: 10px;
+        align-items: center;
+        margin-bottom: 14px;
+      }
+
+      .brand {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        min-width: 0;
+      }
+
+      .mark {
+        width: 38px;
+        height: 38px;
+        border-radius: 14px;
+        display: grid;
+        place-items: center;
+        background: linear-gradient(135deg, var(--accent), #7c3aed);
+        color: #fff;
+        font-weight: 800;
+        box-shadow: 0 12px 26px rgba(91, 97, 255, 0.25);
+      }
+
+      .brand h1 {
+        margin: 0;
+        font-size: 18px;
+        line-height: 1;
+        letter-spacing: -0.03em;
+      }
+
+      .brand p {
+        margin: 3px 0 0;
+        color: var(--muted);
+        font-size: 12px;
+      }
+
+      .pill {
+        padding: 8px 11px;
+        border-radius: 999px;
+        border: 1px solid var(--line);
+        background: rgba(255, 255, 255, 0.72);
+        color: var(--muted);
+        font-size: 12px;
+        white-space: nowrap;
+      }
+
+      .hero,
+      .card {
+        border: 1px solid var(--line);
+        border-radius: 28px;
+        background: var(--card);
+        backdrop-filter: blur(18px);
+        box-shadow: var(--shadow);
+      }
+
+      .hero {
+        padding: 18px;
+        margin-bottom: 14px;
+      }
+
+      .eyebrow {
+        display: inline-flex;
+        padding: 7px 10px;
+        border-radius: 999px;
+        background: rgba(91, 97, 255, 0.1);
+        color: var(--accent);
+        font-size: 11px;
+        font-weight: 800;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+      }
+
+      .hero h2 {
+        margin: 12px 0 8px;
+        font-size: clamp(30px, 7vw, 44px);
+        line-height: 0.98;
+        letter-spacing: -0.05em;
+      }
+
+      .hero p {
+        margin: 0;
+        color: var(--muted);
+        font-size: 14px;
+        line-height: 1.65;
+      }
+
+      .chips {
+        margin-top: 14px;
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 8px;
+      }
+
+      .chip {
+        border: 1px solid var(--line);
+        border-radius: 999px;
+        padding: 11px 10px;
+        background: rgba(255, 255, 255, 0.72);
+        color: #322a25;
+        font: inherit;
+        font-size: 13px;
+        font-weight: 700;
+        cursor: pointer;
+      }
+
+      .chip.active {
+        background: linear-gradient(135deg, rgba(91, 97, 255, 0.16), rgba(124, 58, 237, 0.1));
+        border-color: rgba(91, 97, 255, 0.26);
+        color: #2a319c;
+      }
+
+      .card {
+        padding: 16px;
+      }
+
+      .field {
+        margin-bottom: 12px;
+      }
+
+      .field:last-child { margin-bottom: 0; }
+
+      .field label {
+        display: flex;
+        justify-content: space-between;
+        gap: 8px;
+        margin-bottom: 8px;
+        color: var(--muted);
+        font-size: 12px;
+        font-weight: 800;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+      }
+
+      .field .opt {
+        font-size: 11px;
+        letter-spacing: 0.04em;
+        text-transform: none;
+      }
+
+      textarea {
+        width: 100%;
+        border-radius: 18px;
+        border: 1px solid var(--line);
+        background: rgba(255, 255, 255, 0.92);
+        color: var(--text);
+        font: inherit;
+        outline: none;
+        min-height: 116px;
+        resize: vertical;
+        padding: 14px 15px;
+        line-height: 1.58;
+      }
+
+      textarea:focus, button:focus {
+        border-color: rgba(91, 97, 255, 0.46);
+        box-shadow: 0 0 0 4px rgba(91, 97, 255, 0.12);
+      }
+
+      .hint {
+        margin-top: 8px;
+        color: var(--muted);
+        font-size: 12px;
+        line-height: 1.55;
+      }
+
+      .result-head {
+        display: flex;
+        justify-content: space-between;
+        gap: 10px;
+        align-items: center;
+        margin: 16px 0 12px;
+      }
+
+      .result-head h3 {
+        margin: 0;
+        font-size: 16px;
+        letter-spacing: -0.03em;
+      }
+
+      .status {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 8px 11px;
+        border-radius: 999px;
+        background: rgba(15, 118, 110, 0.1);
+        color: var(--accent-2);
+        font-size: 12px;
+        font-weight: 800;
+      }
+
+      .reply {
+        padding: 16px;
+        border-radius: 24px;
+        border: 1px solid var(--line);
+        background: var(--card-strong);
+      }
+
+      .reply .label {
+        display: block;
+        margin-bottom: 10px;
+        font-size: 12px;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: var(--muted);
+      }
+
+      .reply p {
+        margin: 0;
+        white-space: pre-wrap;
+        line-height: 1.65;
+      }
+
+      .reply-actions {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 8px;
+        margin-top: 12px;
+      }
+
+      .secondary {
+        border: 1px solid var(--line);
+        border-radius: 16px;
+        padding: 12px 14px;
+        background: rgba(255, 255, 255, 0.86);
+        color: var(--text);
+        font: inherit;
+        font-weight: 700;
+        cursor: pointer;
+      }
+
+      .secondary:disabled,
+      .primary:disabled {
+        opacity: 0.45;
+        cursor: not-allowed;
+      }
+
+      .composer-bar {
+        position: fixed;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        padding: 12px 14px calc(14px + env(safe-area-inset-bottom));
+        background: linear-gradient(180deg, rgba(246, 241, 232, 0) 0%, rgba(246, 241, 232, 0.94) 24%, rgba(246, 241, 232, 0.98) 100%);
+        backdrop-filter: blur(20px);
+      }
+
+      .composer-inner {
+        max-width: 640px;
+        margin: 0 auto;
+        display: grid;
+        grid-template-columns: 1fr auto;
+        gap: 10px;
+        align-items: center;
+      }
+
+      .composer-meta strong {
+        display: block;
+        font-size: 14px;
+        line-height: 1.2;
+      }
+
+      .composer-meta span {
+        display: block;
+        margin-top: 3px;
+        color: var(--muted);
+        font-size: 12px;
+        line-height: 1.35;
+      }
+
+      .primary {
+        border: 0;
+        border-radius: 18px;
+        padding: 14px 18px;
+        min-width: 150px;
+        background: linear-gradient(135deg, var(--accent), #7c3aed);
+        color: #fff;
+        font: inherit;
+        font-weight: 800;
+        box-shadow: 0 16px 30px rgba(91, 97, 255, 0.24);
+        cursor: pointer;
+      }
+
+      @media (min-width: 760px) {
+        main { padding-inline: 20px; }
+        .hero, .card { padding: 20px; }
+      }
+
+      @media (max-width: 420px) {
+        .topbar { align-items: flex-start; }
+        .chips { grid-template-columns: 1fr; }
+        .composer-inner { grid-template-columns: 1fr; }
+        .primary { width: 100%; }
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <div class="shell">
+        <div class="topbar">
+          <div class="brand">
+            <div class="mark">A</div>
+            <div>
+              <h1>Assistant réponse</h1>
+              <p>Mobile, simple, hébergé.</p>
+            </div>
+          </div>
+          <div class="pill">Email / SMS / WhatsApp</div>
+        </div>
+
+        <section class="hero">
+          <span class="eyebrow">Une seule réponse</span>
+          <h2>Le contexte sert la réponse, pas l’inverse.</h2>
+          <p>Tu colles le message, tu ajoutes le contexte si tu veux. L’app renvoie une réponse ou une question de précision. Rien de plus.</p>
+
+          <div class="chips" id="channel-chips" aria-label="Canal">
+            <button class="chip active" data-channel="email" type="button">Email</button>
+            <button class="chip" data-channel="sms" type="button">SMS</button>
+            <button class="chip" data-channel="whatsapp" type="button">WhatsApp</button>
+          </div>
+        </section>
+
+        <section class="card">
+          <div class="field">
+            <label for="message">Message reçu <span class="opt">obligatoire</span></label>
+            <textarea id="message" placeholder="Ex: Bonjour, ça va ?"></textarea>
+          </div>
+
+          <div class="field">
+            <label for="context">Contexte <span class="opt">optionnel</span></label>
+            <textarea id="context" placeholder="Ex: tante qui demande après une maladie"></textarea>
+          </div>
+
+          <div class="hint">Une saisie simple. Le serveur s’occupe du reste.</div>
+
+          <div class="result-head">
+            <h3>Réponse</h3>
+            <span class="status" id="status">Prêt</span>
+          </div>
+
+          <div class="reply">
+            <span class="label" id="reply-label">Réponse serveur</span>
+            <p id="reply">Ta réponse apparaîtra ici.</p>
+            <div class="reply-actions">
+              <button class="secondary" id="copy-reply" type="button" disabled>Copier</button>
+              <button class="secondary" id="learn-reply" type="button" disabled>Valider</button>
+            </div>
+          </div>
+        </section>
+      </div>
+    </main>
+
+    <div class="composer-bar">
+      <div class="composer-inner">
+        <div class="composer-meta">
+          <strong>Assistant réponse</strong>
+          <span>Une génération seulement quand tu appuies sur le bouton.</span>
+        </div>
+        <button class="primary" id="generate" type="button">Générer</button>
+      </div>
+    </div>
+
+    <script type="module">
+      const $ = (id) => document.getElementById(id);
+      const state = { channel: 'email' };
+      const current = { message: '', context: '', reply: '', kind: 'reply' };
+
+      function setActionState(enabled) {
+        $('copy-reply').disabled = !enabled;
+        $('learn-reply').disabled = !enabled;
+      }
+
+      async function copyCurrentReply() {
+        if (!current.reply) return;
+        await navigator.clipboard.writeText(current.reply);
+        $('status').textContent = 'Copié';
+      }
+
+      async function learnCurrentReply() {
+        if (!current.reply || !current.message) return;
+
+        const payload = {
+          channel: state.channel,
+          mode: 'written',
+          message: current.message,
+          context: current.context,
+        };
+
+        const response = await fetch('/api/learn', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            input: JSON.stringify(payload),
+            output: current.reply,
+          }),
+        });
+
+        if (!response.ok) {
+          throw new Error('learning_failed');
+        }
+
+        $('status').textContent = 'Appris';
+      }
+
+      $('channel-chips').addEventListener('click', (event) => {
+        const button = event.target.closest('button[data-channel]');
+        if (!button) return;
+        state.channel = button.dataset.channel;
+        document.querySelectorAll('.chip').forEach((chip) => {
+          chip.classList.toggle('active', chip.dataset.channel === state.channel);
+        });
+      });
+
+      $('generate').addEventListener('click', async () => {
+        const message = $('message').value.trim();
+        const context = $('context').value.trim();
+
+        current.message = message;
+        current.context = context;
+        current.reply = '';
+        current.kind = 'reply';
+        setActionState(false);
+
+        if (!message) {
+          $('status').textContent = 'Message requis';
+          $('reply-label').textContent = 'Question';
+          $('reply').textContent = 'Colle le message reçu.';
+          return;
+        }
+
+        $('status').textContent = 'Analyse en cours';
+        $('reply-label').textContent = 'Réponse serveur';
+        $('reply').textContent = '...';
+
+        try {
+          const response = await fetch('/api/reply', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ channel: state.channel, message, context }),
+          });
+
+          const data = await response.json();
+          $('reply-label').textContent = data.kind === 'question' ? 'Question de contexte' : 'Réponse';
+          $('reply').textContent = data.reply;
+          $('status').textContent = data.kind === 'question' ? 'Besoin d’un détail' : 'Réponse prête';
+          current.reply = data.reply;
+          current.kind = data.kind;
+          setActionState(data.kind === 'reply');
+        } catch (error) {
+          $('status').textContent = 'Erreur serveur';
+          $('reply-label').textContent = 'Erreur';
+          $('reply').textContent = 'Impossible de générer la réponse pour le moment.';
+          setActionState(false);
+        }
+      });
+
+      $('copy-reply').addEventListener('click', async () => {
+        try {
+          await copyCurrentReply();
+        } catch {
+          $('status').textContent = 'Copie impossible';
+        }
+      });
+
+      $('learn-reply').addEventListener('click', async () => {
+        try {
+          await learnCurrentReply();
+        } catch {
+          $('status').textContent = 'Apprentissage impossible';
+        }
+      });
+
+      setActionState(false);
+    </script>
+  </body>
+</html>

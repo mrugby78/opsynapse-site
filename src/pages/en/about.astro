@@ -1,0 +1,71 @@
+---
+import Base from '../../layouts/Base.astro';
+import { ui } from '../../i18n/ui';
+const lang = 'en';
+const t = (k: string) => ui[lang][k as keyof typeof ui.en] ?? k;
+const jobs = [
+  { date: '2025 — present', role: 'Head of Customer Success France', company: 'Flatpay', desc: 'Running France CS operations, managing 12+ agents, cross-functional processes (CS/KYC/Ops/Finance), AI CS agent project, NPS -14 → 45.' },
+  { date: '2022 — 2025', role: 'Head of Customer Success France', company: 'Fixter', desc: 'Built the French business from scratch. Team of 7, CS + driver ops + garage coordination. NPS > 65 target. Renault deployment.' },
+  { date: '2019 — 2022', role: 'Head of Customer Service France', company: 'iziwork', desc: 'Managed 8 agents in fast-growth scale-up. SLAs, taxonomies, reporting, automation. B2B + B2C in digital temp staffing.' },
+  { date: '2010 — 2016', role: 'Shift Leader · Project Manager', company: 'PokerStars', desc: 'International 24/7 customer service (FR, UK, Malta, Costa Rica, Australia). Escalations, WFM, coaching across time zones.' },
+  { date: '2008 — 2010', role: 'Commercial Account Manager', company: 'National Pen', desc: 'B2B sales from Ireland. Prospecting, retention, mentoring. Weekly targets.' },
+  { date: '2006 — 2008', role: 'Telemarketing Assistant Manager', company: 'Tryba', desc: 'First role. B2C prospecting, call scripts, strategy to generate new clients.' },
+];
+const edu = [
+  { date: '2026', title: "CS50's Introduction to AI with Python", school: 'Harvard University' },
+  { date: '2024 — 2025', title: 'AI Project Manager — Postgraduate', school: '26academy' },
+  { date: '2025', title: 'Learning AI Through Visualization', school: 'Columbia University' },
+];
+const langs = [{ name: 'French', level: 'Native' }, { name: 'English', level: 'Fluent professional' }];
+---
+<Base lang={lang} page="parcours">
+  <section class="page-header">
+    <div class="container">
+      <span class="hero-tag">{t('site.tagline')}</span>
+      <h1>{t('parcours.title')}</h1>
+      <p class="sub">{t('parcours.intro')}</p>
+    </div>
+  </section>
+  <section style="padding-top:24px">
+    <div class="container">
+      <div class="timeline">
+        {jobs.map(j => (
+          <div class="timeline-item">
+            <div class="date">{j.date}</div>
+            <div>
+              <div class="role">{j.role}</div>
+              <div class="company">{j.company}</div>
+              <div class="desc">{j.desc}</div>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  </section>
+  <section>
+    <div class="container">
+      <h2>Education</h2>
+      <div class="card-grid">
+        {edu.map(e => (
+          <div class="card">
+            <h3>{e.title}</h3>
+            <div class="meta">{e.school} · {e.date}</div>
+          </div>
+        ))}
+      </div>
+    </div>
+  </section>
+  <section>
+    <div class="container">
+      <h2>Languages</h2>
+      <div class="card-grid">
+        {langs.map(l => (
+          <div class="card">
+            <h3>{l.name}</h3>
+            <div class="meta">{l.level}</div>
+          </div>
+        ))}
+      </div>
+    </div>
+  </section>
+</Base>

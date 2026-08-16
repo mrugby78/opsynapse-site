@@ -1,0 +1,23 @@
+---
+import Base from '../../layouts/Base.astro';
+import { ui } from '../../i18n/ui';
+const lang = 'en';
+const t = (k: string) => ui[lang][k as keyof typeof ui.en] ?? k;
+---
+<Base lang={lang} page="contact">
+  <section class="page-header">
+    <div class="container">
+      <span class="hero-tag">{t('site.tagline')}</span>
+      <h1>{t('contact.title')}</h1>
+      <p class="sub">{t('contact.intro')}</p>
+    </div>
+  </section>
+  <section style="padding-top:24px">
+    <div class="container">
+      <ul class="contact-list">
+        <li><span class="label">{t('contact.email')}</span><span class="value">romain.pinsard@gmail.com</span></li>
+        <li><span class="label">{t('contact.linkedin')}</span><span class="value">linkedin.com/in/romainpinsard</span></li>
+      </ul>
+    </div>
+  </section>
+</Base>

@@ -1,0 +1,38 @@
+---
+import Base from '../layouts/Base.astro';
+import { ui } from '../i18n/ui';
+const lang = 'fr';
+const t = (k: string) => ui[lang][k as keyof typeof ui.fr] ?? k;
+const items = [
+  { title: 'NPS -14 → 45', company: 'Flatpay', date: '2025 — 2026', desc: 'Relèvement du NPS sur le marché France en moins d\'un an, malgré une forte montée en volume et des incidents partenaires (Rapyd, Shift4).' },
+  { title: 'Volumes d\'appels ×4,5', company: 'Flatpay', date: '2025 — 2026', desc: 'Absorption d\'une croissance massive des appels sans dégradation des SLA, via structuration des shifts et des process.' },
+  { title: 'Support commercial absorbé par le CS', company: 'Flatpay', date: '2025 — 2026', desc: '~80h/semaine de support commercial basculées du commercial vers le CS, libérant les équipes sales.' },
+  { title: 'Agent CS IA (niveau 1 et 2)', company: 'Flatpay', date: '2025 — 2026', desc: 'Contribution à un agent IA prenant en charge troubleshooting connexions, activation fonctionnalités et explication des versements. France parmi les premiers marchés de lancement.' },
+  { title: 'Construction activité France à zéro', company: 'Fixter', date: '2022 — 2025', desc: 'Création de l\'activité française de Fixter de zéro. Process, outils, standards, équipe multidisciplinaire de 7 personnes (CS + ops chauffeurs + coordination garages).' },
+  { title: 'Déploiement plateforme pour Renault', company: 'Fixter', date: '2022 — 2025', desc: 'Pilotage du projet B2B de déploiement de la plateforme Fixter chez Renault.' },
+  { title: 'Structuration du service client iziwork', company: 'iziwork', date: '2019 — 2022', desc: 'SLA, taxonomies, classification des demandes, reporting et automatisation pour une équipe de 8 agents en très forte croissance (B2B + B2C).' },
+  { title: 'Opérations 24/7 multi-sites', company: 'PokerStars', date: '2010 — 2016', desc: 'Coordination d\'équipes réparties sur 5 pays et plusieurs fuseaux horaires. WFM, escalades, incidents, coaching de nouveaux Shift Leaders.' },
+];
+---
+<Base lang={lang} page="realisations">
+  <section class="page-header">
+    <div class="container">
+      <span class="hero-tag">{t('site.tagline')}</span>
+      <h1>{t('realisations.title')}</h1>
+      <p class="sub">{t('realisations.intro')}</p>
+    </div>
+  </section>
+  <section style="padding-top:24px">
+    <div class="container">
+      <div class="card-grid">
+        {items.map(it => (
+          <div class="card">
+            <h3>{it.title}</h3>
+            <div class="meta">{it.company} · {it.date}</div>
+            <p>{it.desc}</p>
+          </div>
+        ))}
+      </div>
+    </div>
+  </section>
+</Base>

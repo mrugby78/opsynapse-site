@@ -1,0 +1,38 @@
+---
+import Base from '../../layouts/Base.astro';
+import { ui } from '../../i18n/ui';
+const lang = 'en';
+const t = (k: string) => ui[lang][k as keyof typeof ui.en] ?? k;
+const items = [
+  { title: 'NPS -14 → 45', company: 'Flatpay', date: '2025 — 2026', desc: 'Lifted NPS on the French market in under a year despite strong volume growth and partner incidents (Rapyd, Shift4).' },
+  { title: 'Call volumes ×4.5', company: 'Flatpay', date: '2025 — 2026', desc: 'Absorbed a massive call growth without SLA degradation through shift structuring and process design.' },
+  { title: 'Commercial support absorbed by CS', company: 'Flatpay', date: '2025 — 2026', desc: '~80h/week of commercial support shifted from sales to CS, freeing the sales teams.' },
+  { title: 'AI CS Agent (tier 1 and 2)', company: 'Flatpay', date: '2025 — 2026', desc: 'Contributed to an AI agent handling connection troubleshooting, feature activation and payout explanations. France among the first launch markets.' },
+  { title: 'Built France operations from zero', company: 'Fixter', date: '2022 — 2025', desc: 'Created Fixter\'s French business from scratch. Processes, tools, standards, multidisciplinary team of 7 (CS + driver ops + garage coordination).' },
+  { title: 'Platform deployment for Renault', company: 'Fixter', date: '2022 — 2025', desc: 'Led the B2B project to deploy the Fixter platform at Renault.' },
+  { title: 'Structured iziwork customer service', company: 'iziwork', date: '2019 — 2022', desc: 'SLAs, taxonomies, request classification, reporting and automation for an 8-agent team in hypergrowth (B2B + B2C).' },
+  { title: '24/7 multi-site operations', company: 'PokerStars', date: '2010 — 2016', desc: 'Coordinated teams across 5 countries and multiple time zones. WFM, escalations, incidents, coached new Shift Leaders.' },
+];
+---
+<Base lang={lang} page="realisations">
+  <section class="page-header">
+    <div class="container">
+      <span class="hero-tag">{t('site.tagline')}</span>
+      <h1>{t('realisations.title')}</h1>
+      <p class="sub">{t('realisations.intro')}</p>
+    </div>
+  </section>
+  <section style="padding-top:24px">
+    <div class="container">
+      <div class="card-grid">
+        {items.map(it => (
+          <div class="card">
+            <h3>{it.title}</h3>
+            <div class="meta">{it.company} · {it.date}</div>
+            <p>{it.desc}</p>
+          </div>
+        ))}
+      </div>
+    </div>
+  </section>
+</Base>

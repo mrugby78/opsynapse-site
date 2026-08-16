@@ -1,0 +1,34 @@
+---
+import Base from '../layouts/Base.astro';
+import { ui } from '../i18n/ui';
+const lang = 'fr';
+const t = (k: string) => ui[lang][k as keyof typeof ui.fr] ?? k;
+const steps = [
+  { title: t('method.step.1.title'), text: t('method.step.1.text') },
+  { title: t('method.step.2.title'), text: t('method.step.2.text') },
+  { title: t('method.step.3.title'), text: t('method.step.3.text') },
+  { title: t('method.step.4.title'), text: t('method.step.4.text') },
+];
+---
+<Base lang={lang} page="method">
+  <section class="page-header">
+    <div class="container">
+      <span class="hero-tag">{t('site.tagline')}</span>
+      <h1>{t('method.title')}</h1>
+      <p class="sub">{t('method.intro')}</p>
+    </div>
+  </section>
+  <section style="padding-top:24px">
+    <div class="container">
+      <div class="card-grid">
+        {steps.map(s => (
+          <div class="card">
+            <h3>{s.title}</h3>
+            <p>{s.text}</p>
+          </div>
+        ))}
+      </div>
+      <p style="margin-top:32px;color:var(--text-dim)">{t('method.next')}</p>
+    </div>
+  </section>
+</Base>

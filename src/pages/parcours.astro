@@ -1,0 +1,71 @@
+---
+import Base from '../layouts/Base.astro';
+import { ui } from '../i18n/ui';
+const lang = 'fr';
+const t = (k: string) => ui[lang][k as keyof typeof ui.fr] ?? k;
+const jobs = [
+  { date: '2025 — présent', role: 'Head of Customer Success France', company: 'Flatpay', desc: 'Pilotage de l\'activité CS France, management de 12+ agents, process transverses CS/KYC/Ops/Finance, projet d\'agent CS IA, NPS -14 → 45.' },
+  { date: '2022 — 2025', role: 'Head of Customer Success France', company: 'Fixter', desc: 'Construction de l\'activité France à partir de zéro. Équipe de 7, CS + ops chauffeurs + coordination garages. NPS > 65 visé. Déploiement Renault.' },
+  { date: '2019 — 2022', role: 'Responsable Service Clients France', company: 'iziwork', desc: 'Management de 8 agents en forte croissance. SLA, taxonomies, reporting, automatisation. Environnement B2B + B2C en intérim digital.' },
+  { date: '2010 — 2016', role: 'Shift Leader · Chef de projet', company: 'PokerStars', desc: 'Service client international 24/7 (FR, UK, Malte, Costa Rica, Australie). Escalades, WFM, coaching, coordination multi-fuseaux.' },
+  { date: '2008 — 2010', role: 'Commercial Account Manager', company: 'National Pen', desc: 'Vente B2B depuis l\'Irlande. Prospection, fidélisation, mentorat. Objectifs hebdomadaires.' },
+  { date: '2006 — 2008', role: 'Assistant responsable télémarketing', company: 'Tryba', desc: 'Premier poste. Prospection B2C, scripts d\'appels, stratégie de génération de nouveaux clients.' },
+];
+const edu = [
+  { date: '2026', title: "CS50's Introduction to AI with Python", school: 'Harvard University' },
+  { date: '2024 — 2025', title: 'Chef de projet IA — Bac+5', school: '26academy' },
+  { date: '2025', title: 'Learning AI Through Visualization', school: 'Columbia University' },
+];
+const langs = [{ name: 'Français', level: 'Langue maternelle' }, { name: 'Anglais', level: 'Professionnel courant' }];
+---
+<Base lang={lang} page="parcours">
+  <section class="page-header">
+    <div class="container">
+      <span class="hero-tag">{t('site.tagline')}</span>
+      <h1>{t('parcours.title')}</h1>
+      <p class="sub">{t('parcours.intro')}</p>
+    </div>
+  </section>
+  <section style="padding-top:24px">
+    <div class="container">
+      <div class="timeline">
+        {jobs.map(j => (
+          <div class="timeline-item">
+            <div class="date">{j.date}</div>
+            <div>
+              <div class="role">{j.role}</div>
+              <div class="company">{j.company}</div>
+              <div class="desc">{j.desc}</div>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  </section>
+  <section>
+    <div class="container">
+      <h2>Formation</h2>
+      <div class="card-grid">
+        {edu.map(e => (
+          <div class="card">
+            <h3>{e.title}</h3>
+            <div class="meta">{e.school} · {e.date}</div>
+          </div>
+        ))}
+      </div>
+    </div>
+  </section>
+  <section>
+    <div class="container">
+      <h2>Langues</h2>
+      <div class="card-grid">
+        {langs.map(l => (
+          <div class="card">
+            <h3>{l.name}</h3>
+            <div class="meta">{l.level}</div>
+          </div>
+        ))}
+      </div>
+    </div>
+  </section>
+</Base>

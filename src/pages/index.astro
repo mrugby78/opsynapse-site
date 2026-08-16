@@ -1,0 +1,78 @@
+---
+import Base from '../layouts/Base.astro';
+import { ui } from '../i18n/ui';
+const lang = 'fr';
+const t = (k: string) => ui[lang][k as keyof typeof ui.fr] ?? k;
+const pillars = [
+  { title: t('home.pillars.1.title'), text: t('home.pillars.1.text') },
+  { title: t('home.pillars.2.title'), text: t('home.pillars.2.text') },
+  { title: t('home.pillars.3.title'), text: t('home.pillars.3.text') },
+];
+---
+<Base lang={lang} page="home">
+  <section class="hero">
+    <div class="container hero-inner">
+      <div>
+        <span class="hero-tag">{t('site.tagline')}</span>
+        <h1>{t('hero.title')}</h1>
+        <p class="sub">{t('hero.subtitle')}</p>
+        <div class="hero-cta">
+          <a class="btn btn-primary" href="/method">{t('hero.cta')}</a>
+          <a class="btn btn-ghost" href="/tools">{t('hero.cta2')}</a>
+        </div>
+      </div>
+      <img src="/romain.jpg" alt="Opsynapse" class="portrait" />
+    </div>
+  </section>
+
+  <section>
+    <div class="container">
+      <h2>{t('home.pillars.title')}</h2>
+      <div class="card-grid">
+        {pillars.map(p => (
+          <div class="card">
+            <h3>{p.title}</h3>
+            <p>{p.text}</p>
+          </div>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="container">
+      <div class="about-grid">
+        <div>
+          <h2>{t('home.about.title')}</h2>
+          <div class="about-text">
+            <p>{t('home.about.p1')}</p>
+            <p>{t('home.about.p2')}</p>
+          </div>
+        </div>
+        <div>
+          <h2>{t('home.positioning.title')}</h2>
+          <p style="color:var(--text-dim)">{t('home.positioning.text')}</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="container">
+      <h2>{t('home.stats.title')}</h2>
+      <div class="stats">
+        <div class="stat"><div class="num">100+</div><div class="label">{t('home.stats.agents')}</div></div>
+        <div class="stat"><div class="num">-14 → 45</div><div class="label">{t('home.stats.nps')}</div></div>
+        <div class="stat"><div class="num">>90%</div><div class="label">{t('home.stats.team')}</div></div>
+        <div class="stat"><div class="num">×4,5</div><div class="label">{t('home.stats.volume')}</div></div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="container">
+      <h2>{t('home.edu.title')}</h2>
+      <p style="color:var(--text-dim);max-width:720px">{t('home.edu.text')}</p>
+    </div>
+  </section>
+</Base>
