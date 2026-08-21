@@ -1,0 +1,169 @@
+---
+import Base from '../../layouts/Base.astro';
+import AdSlot from '../../components/AdSlot.astro';
+import CalcCTA from '../../components/CalcCTA.astro';
+import { ui } from '../../i18n/ui';
+const lang = 'fr';
+const t = (k: string) => ui[lang][k as keyof typeof ui.fr] ?? k;
+---
+
+<Base lang={lang} page="tools" title="Calculateur de déflection service client gratuit | Opsynapse" description="Calculez votre taux de déflection : le pourcentage de tickets évités par le self-service (FAQ, chatbot, help center). Justifiez vos investissements en automatisation. Outil gratuit.">
+
+  <section class="page-header">
+    <div class="container">
+      <span class="hero-tag">{t('site.tagline')}</span>
+      <h1>Calculateur de déflection</h1>
+      <p class="sub">Calculez le pourcentage de demandes évitées par votre self-service (FAQ, chatbot, help center). Mesurez le ROI de votre automatisation et identifiez les gains potentiels.</p>
+    </div>
+  </section>
+
+  <section style="padding-top:24px">
+    <div class="container">
+      <div class="calc-layout">
+        <div class="calc-form">
+          <h2 class="calc-section-title">Vos données</h2>
+          <p class="calc-section-desc">Sur une période (mois) :</p>
+
+          <div class="calc-field">
+            <label for="total-demand">Demandes totales reçues (contacts)</label>
+            <input type="number" id="total-demand" min="0" value="0" />
+            <span class="calc-field-hint">Appels + chats + emails + tickets</span>
+          </div>
+
+          <div class="calc-field">
+            <label for="self-served">Demandes résolues en self-service</label>
+            <input type="number" id="self-served" min="0" value="0" />
+            <span class="calc-field-hint">FAQ consultée, chatbot résolu, help center</span>
+          </div>
+
+          <div class="calc-field">
+            <label for="cost-contact">Coût par contact agent (€)</label>
+            <input type="number" id="cost-contact" min="0" value="8" step="0.5" />
+            <span class="calc-field-hint">Coût moyen d'un contact traité par un agent</span>
+          </div>
+
+          <div class="calc-field">
+            <label for="cost-self">Coût d'un self-service (€/contact)</label>
+            <input type="number" id="cost-self" min="0" value="0.5" step="0.1" />
+            <span class="calc-field-hint">Souvent 0,20 à 1€ (chatbot, FAQ, IA)</span>
+          </div>
+
+          <button id="calc-btn" class="btn btn-primary calc-btn">Calculer</button>
+        </div>
+
+        <div class="calc-result" id="result" style="display:none">
+          <div class="calc-score-block">
+            <span class="calc-score-label">Taux de déflection</span>
+            <div class="calc-score" id="defl-score">--</div>
+            <span class="calc-score-status" id="defl-status">--</span>
+          </div>
+
+          <div class="calc-breakdown">
+            <h3>Impact financier</h3>
+            <table class="calc-table">
+              <tbody>
+                <tr><td>Demandes totales</td><td><strong id="r-demand">--</strong></td></tr>
+                <tr><td>Résolues en self-service</td><td><strong id="r-self">--</strong></td></tr>
+                <tr><td>Contacts agent évités</td><td><strong id="r-avoided">--</strong></td></tr>
+                <tr><td>Coût si tout traité par agent</td><td><strong id="r-cost-agent">--</strong> €</td></tr>
+                <tr><td>Coût réel (self + agent)</td><td><strong id="r-cost-real">--</strong> €</td></tr>
+                <tr><td>Économie mensuelle</td><td><strong id="r-saved">--</strong> €</td></tr>
+                <tr><td>Économie annuelle</td><td><strong id="r-saved-year">--</strong> €</td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="calc-benchmark">
+            <h3>Interprétation</h3>
+            <p id="defl-interpretation">--</p>
+          </div>
+
+          <div class="calc-benchmark">
+            <h3>Benchmarks déflection</h3>
+            <table class="calc-table">
+              <thead>
+                <tr><th>Maturité self-service</th><th>Taux de déflection</th></tr>
+              </thead>
+              <tbody>
+                <tr><td>Pas de self-service</td><td>0-5%</td></tr>
+                <tr><td>FAQ basique</td><td>10-20%</td></tr>
+                <tr><td>FAQ + chatbot</td><td>25-40%</td></tr>
+                <tr><td>Help center + IA + chatbot</td><td>40-60%</td></tr>
+                <tr><td>Self-service avancé (best-in-class)</td><td>60-80%</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="calc-result calc-empty" id="result-empty">
+          <p>Entrez vos chiffres et cliquez sur Calculer.</p>
+        </div>
+      </div>
+
+      <AdSlot slot="1111111117" />
+
+      <div class="calc-info">
+        <h2>La déflection, c'est quoi ?</h2>
+        <p>La déflection (deflection rate) est le pourcentage de demandes client résolues sans intervention d'un agent humain. C'est l'indicateur clé pour mesurer le ROI du self-service (FAQ, chatbot, help center, IA).</p>
+        <p>La formule : <strong>Déflection = (Demandes self-service / Demandes totales) x 100</strong></p>
+        <p>Chaque point de déflection gagné réduit directement le volume de contacts agents. Si vous traitez 5000 contacts/mois à 8€ et que vous passez de 20% à 40% de déflection, vous économisez 4000€/mois, soit 48000€/an.</p>
+      </div>
+
+      <CalcCTA tool="Calculateur déflection" />
+
+      <p style="margin-top:32px"><a href="/tools" class="btn btn-ghost">← Retour aux outils</a></p>
+    </div>
+  </section>
+</Base>
+
+<script is:inline>
+  function calcDeflection() {
+    const demand = parseInt(document.getElementById("total-demand").value) || 0;
+    const selfServed = parseInt(document.getElementById("self-served").value) || 0;
+    const costAgent = parseFloat(document.getElementById("cost-contact").value) || 0;
+    const costSelf = parseFloat(document.getElementById("cost-self").value) || 0;
+
+    if (demand === 0) { alert("Entrez les demandes totales."); return; }
+
+    const rate = (selfServed / demand) * 100;
+    const agentContacts = demand - selfServed;
+    const costAllAgent = demand * costAgent;
+    const costReal = (selfServed * costSelf) + (agentContacts * costAgent);
+    const saved = costAllAgent - costReal;
+    const savedYear = saved * 12;
+
+    document.getElementById("defl-score").textContent = rate.toFixed(1) + "%";
+    document.getElementById("r-demand").textContent = demand.toLocaleString("fr-FR");
+    document.getElementById("r-self").textContent = selfServed.toLocaleString("fr-FR");
+    document.getElementById("r-avoided").textContent = agentContacts.toLocaleString("fr-FR");
+    document.getElementById("r-cost-agent").textContent = costAllAgent.toLocaleString("fr-FR");
+    document.getElementById("r-cost-real").textContent = costReal.toLocaleString("fr-FR");
+    document.getElementById("r-saved").textContent = saved.toLocaleString("fr-FR");
+    document.getElementById("r-saved-year").textContent = savedYear.toLocaleString("fr-FR");
+
+    let status, interpretation;
+    if (rate < 10) {
+      status = "Tres faible";
+      interpretation = "Presque aucune demande n'est resolue en self-service. Investir dans une FAQ et un chatbot pourrait vous faire economiser " + savedYear.toLocaleString("fr-FR") + " €/an si vous atteignez 30%.";
+    } else if (rate < 30) {
+      status = "Bas";
+      interpretation = "Votre deflection est faible. Vous avez du self-service mais il est sous-exploite. Optimisez le contenu de votre FAQ et ajoutez un chatbot. Potentiel d'economie important.";
+    } else if (rate < 50) {
+      status = "Bon";
+      interpretation = "Votre deflection est bonne. Le self-service fonctionne. Cherchez a ameliorer la resolution du chatbot et a couvrir plus de cas d'usage pour viser 50%.";
+    } else {
+      status = "Excellent";
+      interpretation = "Votre deflection est excellente. Votre self-service est mature. Economie annuelle estimee : " + savedYear.toLocaleString("fr-FR") + " €. Concentrez-vous sur la qualite des 50% restants.";
+    }
+
+    document.getElementById("defl-status").textContent = status;
+    document.getElementById("defl-interpretation").textContent = interpretation;
+    document.getElementById("result").style.display = "block";
+    document.getElementById("result-empty").style.display = "none";
+
+    const color = rate < 10 ? "#c62828" : rate < 30 ? "#e65100" : rate < 50 ? "#8a6d1f" : "#2e7d32";
+    document.getElementById("defl-score").style.color = color;
+    document.getElementById("defl-status").style.color = color;
+  }
+  document.getElementById("calc-btn").addEventListener("click", calcDeflection);
+</script>
