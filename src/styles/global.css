@@ -409,6 +409,13 @@ footer {
 }
 .calc-list li:last-child { border-bottom: none; }
 
+/* AD SLOTS */
+.ad-slot {
+  margin: 24px 0;
+  min-height: 100px;
+  text-align: center;
+}
+
 /* RESPONSIVE */
 @media (max-width: 768px) {
   .hero-inner { grid-template-columns: 1fr; gap: 40px; text-align: center; }

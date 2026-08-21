@@ -1,11 +1,12 @@
 ---
 import Base from '../../layouts/Base.astro';
+import AdSlot from '../../components/AdSlot.astro';
 import { ui } from '../../i18n/ui';
 const lang = 'fr';
 const t = (k: string) => ui[lang][k as keyof typeof ui.fr] ?? k;
 ---
 
-<Base lang={lang} page="tools">
+<Base lang={lang} page="tools" title="Calculateur de temps de réponse moyen (FRT) gratuit | Opsynapse" description="Calculez votre First Response Time moyen. Entrez le nombre de tickets et le temps total de réponse. Comparez aux standards par canal (chat, phone, email, ticket). Outil gratuit service client.">
   <section class="page-header">
     <div class="container">
       <span class="hero-tag">{t('site.tagline')}</span>
@@ -92,6 +93,8 @@ const t = (k: string) => ui[lang][k as keyof typeof ui.fr] ?? k;
           <p>Entrez vos chiffres et cliquez sur Calculer.</p>
         </div>
       </div>
+
+      <AdSlot slot="6666666666" />
 
       <div class="calc-info">
         <h2>Le temps de réponse, c'est quoi ?</h2>
