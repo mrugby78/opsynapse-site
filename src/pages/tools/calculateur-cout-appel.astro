@@ -1,0 +1,162 @@
+---
+import Base from '../../layouts/Base.astro';
+import AdSlot from '../../components/AdSlot.astro';
+import CalcCTA from '../../components/CalcCTA.astro';
+import { ui } from '../../i18n/ui';
+const lang = 'fr';
+const t = (k: string) => ui[lang][k as keyof typeof ui.fr] ?? k;
+---
+
+<Base lang={lang} page="tools" title="Calculateur de coût par appel gratuit | Opsynapse" description="Calculez le coût unitaire de chaque appel téléphonique traité par votre service client. Entrez les coûts totaux et le volume d'appels. Comparez aux benchmarks. Outil gratuit.">
+
+  <section class="page-header">
+    <div class="container">
+      <span class="hero-tag">{t('site.tagline')}</span>
+      <h1>Calculateur de coût par appel</h1>
+      <p class="sub">Calculez combien coûte chaque appel téléphonique traité par votre équipe. Entrez le coût total mensuel et le volume d'appels, obtenez le coût unitaire et comparez aux benchmarks.</p>
+    </div>
+  </section>
+
+  <section style="padding-top:24px">
+    <div class="container">
+      <div class="calc-layout">
+        <div class="calc-form">
+          <h2 class="calc-section-title">Vos données</h2>
+          <p class="calc-section-desc">Tous les coûts mensuels liés au canal téléphone :</p>
+
+          <div class="calc-field">
+            <label for="salaries">Salaires + charges agents (€/mois)</label>
+            <input type="number" id="salaries" min="0" value="0" />
+            <span class="calc-field-hint">Agents qui prennent les appels</span>
+          </div>
+
+          <div class="calc-field">
+            <label for="telecom">Télécom + licence téléphone (€/mois)</label>
+            <input type="number" id="telecom" min="0" value="0" />
+            <span class="calc-field-hint">Lignes, Softphone, ACD, enregistrement</span>
+          </div>
+
+          <div class="calc-field">
+            <label for="other-call">Autres coûts (€/mois)</label>
+            <input type="number" id="other-call" min="0" value="0" />
+            <span class="calc-field-hint">Management, formation, CRM</span>
+          </div>
+
+          <div class="calc-field">
+            <label for="calls">Nombre d'appels traités / mois</label>
+            <input type="number" id="calls" min="0" value="0" />
+            <span class="calc-field-hint">Appels effectivement répondus</span>
+          </div>
+
+          <button id="calc-btn" class="btn btn-primary calc-btn">Calculer</button>
+        </div>
+
+        <div class="calc-result" id="result" style="display:none">
+          <div class="calc-score-block">
+            <span class="calc-score-label">Coût par appel</span>
+            <div class="calc-score" id="cpc-score">--</div>
+            <span class="calc-score-status" id="cpc-status">--</span>
+          </div>
+
+          <div class="calc-breakdown">
+            <h3>Détail</h3>
+            <table class="calc-table">
+              <tbody>
+                <tr><td>Salaires</td><td><strong id="r-sal">--</strong> €</td></tr>
+                <tr><td>Télécom</td><td><strong id="r-tel">--</strong> €</td></tr>
+                <tr><td>Autres</td><td><strong id="r-oth">--</strong> €</td></tr>
+                <tr><td>Coût total / mois</td><td><strong id="r-tot">--</strong> €</td></tr>
+                <tr><td>Appels / mois</td><td><strong id="r-calls">--</strong></td></tr>
+                <tr><td>Coût par appel</td><td><strong id="r-cpc">--</strong> €</td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="calc-benchmark">
+            <h3>Interprétation</h3>
+            <p id="cpc-interpretation">--</p>
+          </div>
+
+          <div class="calc-benchmark">
+            <h3>Benchmarks coût par appel</h3>
+            <table class="calc-table">
+              <thead>
+                <tr><th>Modèle</th><th>Coût par appel</th></tr>
+              </thead>
+              <tbody>
+                <tr><td>Centre externalisé (offshore)</td><td>2-5 €</td></tr>
+                <tr><td>Centre internalisé (France)</td><td>8-15 €</td></tr>
+                <tr><td>Support premium / VIP</td><td>15-30 €</td></tr>
+                <tr><td>Support technique expert</td><td>20-50 €</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="calc-result calc-empty" id="result-empty">
+          <p>Entrez vos chiffres et cliquez sur Calculer.</p>
+        </div>
+      </div>
+
+      <AdSlot slot="1111111113" />
+
+      <div class="calc-info">
+        <h2>Le coût par appel, c'est quoi ?</h2>
+        <p>Le coût par appel (Cost Per Call) est le coût total de votre canal téléphone divisé par le nombre d'appels traités. C'est l'indicateur de référence pour piloter l'efficacité d'un centre d'appels.</p>
+        <p>La formule : <strong>Coût par appel = (Salaires + Télécom + Autres) / Nombre d'appels</strong></p>
+        <p>L'appel est le canal le plus cher. Pour réduire ce coût : déflection vers le self-service, chatbot pour les questions simples, et optimisation du temps de traitement (AHT). Chaque seconde gagnée sur l'AHT réduit directement le coût par appel.</p>
+      </div>
+
+      <CalcCTA tool="Calculateur coût par appel" />
+
+      <p style="margin-top:32px"><a href="/tools" class="btn btn-ghost">← Retour aux outils</a></p>
+    </div>
+  </section>
+</Base>
+
+<script is:inline>
+  function calcCPC() {
+    const sal = parseFloat(document.getElementById("salaries").value) || 0;
+    const tel = parseFloat(document.getElementById("telecom").value) || 0;
+    const oth = parseFloat(document.getElementById("other-call").value) || 0;
+    const calls = parseInt(document.getElementById("calls").value) || 0;
+
+    if (calls === 0) { alert("Entrez un nombre d'appels."); return; }
+
+    const total = sal + tel + oth;
+    const cpc = total / calls;
+
+    document.getElementById("cpc-score").textContent = cpc.toFixed(2) + " €";
+    document.getElementById("r-sal").textContent = sal.toLocaleString("fr-FR");
+    document.getElementById("r-tel").textContent = tel.toLocaleString("fr-FR");
+    document.getElementById("r-oth").textContent = oth.toLocaleString("fr-FR");
+    document.getElementById("r-tot").textContent = total.toLocaleString("fr-FR");
+    document.getElementById("r-calls").textContent = calls.toLocaleString("fr-FR");
+    document.getElementById("r-cpc").textContent = cpc.toFixed(2) + " €";
+
+    let status, interpretation;
+    if (cpc < 5) {
+      status = "Tres efficace";
+      interpretation = "Votre cout par appel est tres bas, probablement grace a un volume eleve ou une externalisation. Verifiez que la qualite n'est pas sacrifiee.";
+    } else if (cpc < 15) {
+      status = "Standard";
+      interpretation = "Votre cout par appel est dans la norme d'un centre internalise en France. Pour reduire : augmentez la deflection et optimisez l'AHT.";
+    } else if (cpc < 30) {
+      status = "Eleve";
+      interpretation = "Votre cout par appel est eleve. Causes probables : faible volume, AHT long, ou effectif sur-dimensionne. Poussez le self-service pour reduire le volume entrant.";
+    } else {
+      status = "A optimiser";
+      interpretation = "Votre cout par appel est tres eleve. Soit vous traitez des appels complexes (technique, premium) et c'est justifie, soit il y a un probleme de dimensionnement. Analysez le ratio appels/agent.";
+    }
+
+    document.getElementById("cpc-status").textContent = status;
+    document.getElementById("cpc-interpretation").textContent = interpretation;
+    document.getElementById("result").style.display = "block";
+    document.getElementById("result-empty").style.display = "none";
+
+    const color = cpc < 5 ? "#2e7d32" : cpc < 15 ? "#8a6d1f" : cpc < 30 ? "#e65100" : "#c62828";
+    document.getElementById("cpc-score").style.color = color;
+    document.getElementById("cpc-status").style.color = color;
+  }
+  document.getElementById("calc-btn").addEventListener("click", calcCPC);
+</script>

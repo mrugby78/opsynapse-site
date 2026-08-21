@@ -1,0 +1,176 @@
+---
+import Base from '../../layouts/Base.astro';
+import AdSlot from '../../components/AdSlot.astro';
+import CalcCTA from '../../components/CalcCTA.astro';
+import { ui } from '../../i18n/ui';
+const lang = 'fr';
+const t = (k: string) => ui[lang][k as keyof typeof ui.fr] ?? k;
+---
+
+<Base lang={lang} page="tools" title="Générateur de réponses client IA gratuit | Opsynapse" description="Générez des réponses client professionnelles et empathiques en un clic. Collez le message du client, choisissez le ton et le canal. Outil IA gratuit pour agents de service client.">
+
+  <section class="page-header">
+    <div class="container">
+      <span class="hero-tag">{t('site.tagline')}</span>
+      <h1>Générateur de réponses client</h1>
+      <p class="sub">Collez le message de votre client, l'IA génère une réponse professionnelle, empathique et adaptée au canal. Gratuit, sans inscription.</p>
+    </div>
+  </section>
+
+  <section style="padding-top:24px">
+    <div class="container">
+      <div class="calc-layout">
+        <div class="calc-form">
+          <h2 class="calc-section-title">Message du client</h2>
+          <p class="calc-section-desc">Collez le message que vous voulez répondre :</p>
+
+          <div class="calc-field">
+            <label for="client-msg">Message reçu du client</label>
+            <textarea id="client-msg" rows="5" placeholder="Ex: Bonjour, je n'ai toujours pas reçu mon remboursement, ça fait 3 semaines que j'attends..."></textarea>
+          </div>
+
+          <div class="calc-field">
+            <label for="tone">Ton de la réponse</label>
+            <select id="tone">
+              <option value="empathique">Empathique (désolé, compréhensif)</option>
+              <option value="professionnel">Professionnel (factuel, direct)</option>
+              <option value="chaleureux">Chaleureux (ami, proche)</option>
+              <option value="ferme">Ferme (polémique, refus)</option>
+            </select>
+          </div>
+
+          <div class="calc-field">
+            <label for="channel-reply">Canal</label>
+            <select id="channel-reply">
+              <option value="email">Email</option>
+              <option value="chat">Chat en direct</option>
+              <option value="sms">SMS</option>
+            </select>
+          </div>
+
+          <button id="gen-btn" class="btn btn-primary calc-btn">Générer la réponse</button>
+        </div>
+
+        <div class="calc-result" id="result" style="display:none">
+          <div class="calc-breakdown">
+            <h3>Réponse générée</h3>
+            <div id="reply-output" class="reply-output"></div>
+            <button id="copy-btn" class="btn btn-ghost" style="margin-top:16px">Copier</button>
+          </div>
+          <div class="calc-benchmark">
+            <h3>Conseils</h3>
+            <p id="reply-tips"></p>
+          </div>
+        </div>
+
+        <div class="calc-result calc-empty" id="result-empty">
+          <p>Collez le message du client et cliquez sur Générer.</p>
+        </div>
+      </div>
+
+      <AdSlot slot="1111111114" />
+
+      <div class="calc-info">
+        <h2>Comment ça marche ?</h2>
+        <p>Cet outil génère une réponse type basée sur le message du client, le ton choisi et le canal. C'est un point de départ, pas une réponse prête à envoyer. Relisez, adaptez et personnalisez avant d'envoyer.</p>
+        <p><strong>3 règles pour une bonne réponse client :</strong></p>
+        <ul class="calc-list">
+          <li>Reconnaitre le problème avant de proposer une solution</li>
+          <li>Être précis sur les délais et les next steps</li>
+          <li>Terminer par une question ouverte pour garder le contact</li>
+        </ul>
+      </div>
+
+      <CalcCTA tool="Générateur de réponses IA" />
+
+      <p style="margin-top:32px"><a href="/tools" class="btn btn-ghost">← Retour aux outils</a></p>
+    </div>
+  </section>
+</Base>
+
+<style>
+  .reply-output {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 16px;
+    white-space: pre-wrap;
+    font-size: .95rem;
+    line-height: 1.6;
+    color: var(--text);
+    min-height: 100px;
+  }
+  .calc-field textarea {
+    width: 100%;
+    padding: 12px 16px;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    font-size: .95rem;
+    font-family: var(--font);
+    background: var(--bg);
+    color: var(--text);
+    resize: vertical;
+    min-height: 100px;
+  }
+  .calc-field textarea:focus { outline: none; border-color: var(--accent); }
+  .calc-field select {
+    width: 100%;
+    padding: 12px 16px;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    font-size: .95rem;
+    font-family: var(--font);
+    background: var(--bg);
+    color: var(--text);
+  }
+  .calc-field select:focus { outline: none; border-color: var(--accent); }
+</style>
+
+<script is:inline>
+  document.getElementById("gen-btn").addEventListener("click", async () => {
+    const msg = document.getElementById("client-msg").value.trim();
+    if (!msg) { alert("Collez le message du client."); return; }
+
+    const tone = document.getElementById("tone").value;
+    const channel = document.getElementById("channel-reply").value;
+    const btn = document.getElementById("gen-btn");
+    btn.disabled = true;
+    btn.textContent = "Génération...";
+
+    try {
+      const res = await fetch("/api/reply", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ channel: channel, message: msg, mode: "written", context: tone }),
+      });
+      const data = await res.json();
+      const reply = data.reply || data.text || "Génération impossible. Réessayez.";
+      document.getElementById("reply-output").textContent = reply;
+
+      const tips = {
+        empathique: "Ton empathique : parfait pour un client frustré. Vérifiez que la solution est claire après l'empathie.",
+        professionnel: "Ton professionnel : ideal pour les sujets techniques ou contractuels. Ajoutez une touche humaine pour ne pas paraitre froid.",
+        chaleureux: "Ton chaleureux: bon pour les clients fidèles. Attention à rester pro sur les sujets sensibles.",
+        ferme: "Ton ferme: utilisez pour un refus ou une polémique. Restez factuel, citez les règles, proposez une alternative.",
+      };
+      document.getElementById("reply-tips").textContent = tips[tone] || "";
+
+      document.getElementById("result").style.display = "block";
+      document.getElementById("result-empty").style.display = "none";
+    } catch (e) {
+      document.getElementById("reply-output").textContent = "Erreur de génération. Réessayez.";
+      document.getElementById("result").style.display = "block";
+      document.getElementById("result-empty").style.display = "none";
+    }
+    btn.disabled = false;
+    btn.textContent = "Générer la réponse";
+  });
+
+  document.getElementById("copy-btn").addEventListener("click", () => {
+    const text = document.getElementById("reply-output").textContent;
+    navigator.clipboard.writeText(text);
+    const btn = document.getElementById("copy-btn");
+    btn.textContent = "Copié !";
+    setTimeout(() => { btn.textContent = "Copier"; }, 2000);
+  });
+</script>

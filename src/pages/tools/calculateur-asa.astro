@@ -1,0 +1,145 @@
+---
+import Base from '../../layouts/Base.astro';
+import AdSlot from '../../components/AdSlot.astro';
+import CalcCTA from '../../components/CalcCTA.astro';
+import { ui } from '../../i18n/ui';
+const lang = 'fr';
+const t = (k: string) => ui[lang][k as keyof typeof ui.fr] ?? k;
+---
+
+<Base lang={lang} page="tools" title="Calculateur ASA (Average Speed of Answer) gratuit | Opsynapse" description="Calculez votre Average Speed of Answer (ASA). Temps d'attente moyen avant réponse d'un appel. Comparez aux standards du secteur. Outil gratuit service client.">
+
+  <section class="page-header">
+    <div class="container">
+      <span class="hero-tag">{t('site.tagline')}</span>
+      <h1>Calculateur d'ASA (Average Speed of Answer)</h1>
+      <p class="sub">Calculez le temps d'attente moyen avant qu'un agent répond à un appel. Entrez le temps total d'attente et le nombre d'appels répondus. Comparez aux standards.</p>
+    </div>
+  </section>
+
+  <section style="padding-top:24px">
+    <div class="container">
+      <div class="calc-layout">
+        <div class="calc-form">
+          <h2 class="calc-section-title">Vos données</h2>
+          <p class="calc-section-desc">Sur une période (jour, semaine, mois) :</p>
+
+          <div class="calc-field">
+            <label for="total-wait">Temps d'attente total (s)</label>
+            <input type="number" id="total-wait" min="0" value="0" />
+            <span class="calc-field-hint">Somme des temps d'attente de tous les appels répondus</span>
+          </div>
+
+          <div class="calc-field">
+            <label for="answered">Nombre d'appels répondus</label>
+            <input type="number" id="answered" min="0" value="0" />
+            <span class="calc-field-hint">Appels effectivement pris par un agent</span>
+          </div>
+
+          <button id="calc-btn" class="btn btn-primary calc-btn">Calculer</button>
+        </div>
+
+        <div class="calc-result" id="result" style="display:none">
+          <div class="calc-score-block">
+            <span class="calc-score-label">Temps d'attente moyen</span>
+            <div class="calc-score" id="asa-score">--</div>
+            <span class="calc-score-status" id="asa-status">--</span>
+          </div>
+
+          <div class="calc-breakdown">
+            <h3>Détail</h3>
+            <table class="calc-table">
+              <tbody>
+                <tr><td>Temps d'attente total</td><td><strong id="r-wait">--</strong> s</td></tr>
+                <tr><td>Appels répondus</td><td><strong id="r-answered">--</strong></td></tr>
+                <tr><td>ASA</td><td><strong id="r-asa">--</strong> s</td></tr>
+                <tr><td>Standard cible</td><td><strong>30 s</strong></td></tr>
+                <tr><td>Écart vs cible</td><td><strong id="r-gap">--</strong></td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="calc-benchmark">
+            <h3>Interprétation</h3>
+            <p id="asa-interpretation">--</p>
+          </div>
+
+          <div class="calc-benchmark">
+            <h3>Standards ASA</h3>
+            <table class="calc-table">
+              <thead>
+                <tr><th>Type de centre</th><th>ASA cible</th></tr>
+              </thead>
+              <tbody>
+                <tr><td>Support client premium</td><td>Moins de 10 s</td></tr>
+                <tr><td>Service client standard</td><td>Moins de 30 s</td></tr>
+                <tr><td>Support technique</td><td>Moins de 60 s</td></tr>
+                <tr><td>Sales entrant</td><td>Moins de 15 s</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="calc-result calc-empty" id="result-empty">
+          <p>Entrez vos chiffres et cliquez sur Calculer.</p>
+        </div>
+      </div>
+
+      <AdSlot slot="1111111112" />
+
+      <div class="calc-info">
+        <h2>L'ASA, c'est quoi ?</h2>
+        <p>L'Average Speed of Answer (ASA) est le temps d'attente moyen avant qu'un agent réponde à un appel. C'est l'indicateur le plus visible du côté client : c'est le temps qu'il attend en écoutant la musique d'attente.</p>
+        <p>La formule : <strong>ASA = Temps d'attente total / Nombre d'appels répondus</strong></p>
+        <p>Un ASA élevé détruit la satisfaction immédiate. Au-delà de 30 secondes, le client est frustré. Au-delà de 60 secondes, il pense à raccrocher. L'ASA est directement lié au dimensionnement et au taux d'occupation des agents.</p>
+      </div>
+
+      <CalcCTA tool="Calculateur ASA" />
+
+      <p style="margin-top:32px"><a href="/tools" class="btn btn-ghost">← Retour aux outils</a></p>
+    </div>
+  </section>
+</Base>
+
+<script is:inline>
+  function calcASA() {
+    const wait = parseInt(document.getElementById("total-wait").value) || 0;
+    const answered = parseInt(document.getElementById("answered").value) || 0;
+
+    if (answered === 0) { alert("Entrez un nombre d'appels."); return; }
+
+    const asa = wait / answered;
+    const gap = asa - 30;
+
+    document.getElementById("asa-score").textContent = asa.toFixed(1) + " s";
+    document.getElementById("r-wait").textContent = wait.toLocaleString("fr-FR");
+    document.getElementById("r-answered").textContent = answered.toLocaleString("fr-FR");
+    document.getElementById("r-asa").textContent = asa.toFixed(1) + " s";
+    document.getElementById("r-gap").textContent = gap > 0 ? "+" + gap.toFixed(1) + " s" : gap.toFixed(1) + " s";
+
+    let status, interpretation;
+    if (asa < 10) {
+      status = "Excellent";
+      interpretation = "Votre ASA est excellent. Les clients sont quasi immediatement repondus. Maintenez ce niveau, surtout sur les pics.";
+    } else if (asa < 30) {
+      status = "Bon";
+      interpretation = "Votre ASA est dans le standard. Les clients ne patientent pas trop. Surveillez les creneaux de pointe.";
+    } else if (asa < 60) {
+      status = "A ameliorer";
+      interpretation = "Votre ASA est au-dessus du standard. Les clients patientent trop. Causes probables : sous-effectif sur les pics, ou taux d'occupation trop eleve.";
+    } else {
+      status = "Critique";
+      interpretation = "Votre ASA est critique. Plus d'1 minute d'attente en moyenne. Le taux d'abandon va exploser. Renforcez l'effectif immediatement.";
+    }
+
+    document.getElementById("asa-status").textContent = status;
+    document.getElementById("asa-interpretation").textContent = interpretation;
+    document.getElementById("result").style.display = "block";
+    document.getElementById("result-empty").style.display = "none";
+
+    const color = asa < 10 ? "#2e7d32" : asa < 30 ? "#8a6d1f" : asa < 60 ? "#e65100" : "#c62828";
+    document.getElementById("asa-score").style.color = color;
+    document.getElementById("asa-status").style.color = color;
+  }
+  document.getElementById("calc-btn").addEventListener("click", calcASA);
+</script>

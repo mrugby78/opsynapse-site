@@ -1,0 +1,190 @@
+---
+import Base from '../../layouts/Base.astro';
+import AdSlot from '../../components/AdSlot.astro';
+import CalcCTA from '../../components/CalcCTA.astro';
+import { ui } from '../../i18n/ui';
+const lang = 'fr';
+const t = (k: string) => ui[lang][k as keyof typeof ui.fr] ?? k;
+---
+
+<Base lang={lang} page="tools" title="Calculateur Erlang C gratuit | Opsynapse" description="Calculez le nombre d'agents nécessaires avec la formule Erlang C. Entrez le volume d'appels, la durée moyenne et l'objectif de service. Outil gratuit de dimensionnement de centre d'appels.">
+
+  <section class="page-header">
+    <div class="container">
+      <span class="hero-tag">{t('site.tagline')}</span>
+      <h1>Calculateur Erlang C</h1>
+      <p class="sub">La formule mathématique de référence pour dimensionner un centre d'appels. Entrez votre volume d'appels, la durée moyenne et votre objectif de service, obtenez le nombre d'agents nécessaires.</p>
+    </div>
+  </section>
+
+  <section style="padding-top:24px">
+    <div class="container">
+      <div class="calc-layout">
+        <div class="calc-form">
+          <h2 class="calc-section-title">Vos données</h2>
+          <p class="calc-section-desc">Toutes les données sur une période d'1 heure :</p>
+
+          <div class="calc-field">
+            <label for="erl-calls">Appels reçus / heure</label>
+            <input type="number" id="erl-calls" min="0" value="50" />
+            <span class="calc-field-hint">Volume d'appels entrants sur 1 heure</span>
+          </div>
+
+          <div class="calc-field">
+            <label for="erl-aht">Temps de traitement moyen (s)</label>
+            <input type="number" id="erl-aht" min="0" value="180" />
+            <span class="calc-field-hint">Average Handling Time (conversation + après-appel)</span>
+          </div>
+
+          <div class="calc-field">
+            <label for="erl-target">Objectif de service (%)</label>
+            <input type="number" id="erl-target" min="0" max="100" value="80" />
+            <span class="calc-field-hint">% d'appels répondus dans le délai cible</span>
+          </div>
+
+          <div class="calc-field">
+            <label for="erl-delay">Délai cible (s)</label>
+            <input type="number" id="erl-delay" min="0" value="20" />
+            <span class="calc-field-hint">Ex: 80% des appels répondus en 20s</span>
+          </div>
+
+          <div class="calc-field">
+            <label for="erl-shrink">Shrinkage (%)</label>
+            <input type="number" id="erl-shrink" min="0" max="100" value="30" />
+            <span class="calc-field-hint">Temps non productif (pauses, meetings, formation)</span>
+          </div>
+
+          <button id="calc-btn" class="btn btn-primary calc-btn">Calculer</button>
+        </div>
+
+        <div class="calc-result" id="result" style="display:none">
+          <div class="calc-score-block">
+            <span class="calc-score-label">Agents nécessaires</span>
+            <div class="calc-score" id="erl-score">--</div>
+            <span class="calc-score-status" id="erl-status">agents (avec shrinkage)</span>
+          </div>
+
+          <div class="calc-breakdown">
+            <h3>Détail du calcul</h3>
+            <table class="calc-table">
+              <tbody>
+                <tr><td>Trafic Erlang</td><td><strong id="r-erlang">--</strong> Erlangs</td></tr>
+                <tr><td>Agents min (sans shrinkage)</td><td><strong id="r-min">--</strong></td></tr>
+                <tr><td>Agents avec shrinkage</td><td><strong id="r-shrink">--</strong></td></tr>
+                <tr><td>Probabilité d'attente</td><td><strong id="r-wait">--</strong>%</td></tr>
+                <tr><td>ASA estimé</td><td><strong id="r-asa">--</strong> s</td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="calc-benchmark">
+            <h3>Interprétation</h3>
+            <p id="erl-interpretation">--</p>
+          </div>
+
+          <div class="calc-benchmark">
+            <h3>À propos d'Erlang C</h3>
+            <p>Erlang C est la formule mathématique inventée par Agner Krarup Erlang en 1917 pour dimensionner les centraux téléphoniques. Elle est encore utilisée aujourd'hui dans tous les centres d'appels du monde. Elle calcule la probabilité qu'un appel doive attendre, puis en déduit le nombre d'agents nécessaires pour respecter un objectif de service.</p>
+          </div>
+        </div>
+
+        <div class="calc-result calc-empty" id="result-empty">
+          <p>Entrez vos chiffres et cliquez sur Calculer.</p>
+        </div>
+      </div>
+
+      <AdSlot slot="1111111116" />
+
+      <div class="calc-info">
+        <h2>Erlang C, c'est quoi ?</h2>
+        <p>Erlang C est le standard mondial pour le dimensionnement des centres d'appels. La formule prend en compte le volume d'appels, le temps de traitement, l'objectif de service et le délai cible pour calculer le nombre d'agents nécessaires.</p>
+        <p>La formule originale ne tient pas compte du shrinkage. On l'ajoute après pour obtenir le nombre d'agents à recruter. Un agent sur 3 en shrinkage signifie qu'il faut 1,43 agents payés pour avoir 1 agent productif.</p>
+        <p>Cet outil utilise une approximation de la formule Erlang C suffisante pour un dimensionnement opérationnel. Pour un dimensionnement précis avec WFM, utilisez un outil dédié (NICE, Verint, Calabrio).</p>
+      </div>
+
+      <CalcCTA tool="Calculateur Erlang C" />
+
+      <p style="margin-top:32px"><a href="/tools" class="btn btn-ghost">← Retour aux outils</a></p>
+    </div>
+  </section>
+</Base>
+
+<script is:inline>
+  function factorial(n) {
+    if (n <= 1) return 1;
+    let r = 1;
+    for (let i = 2; i <= n; i++) r *= i;
+    return r;
+  }
+
+  function erlangC(m, u) {
+    // m = number of agents, u = traffic in Erlangs
+    // Returns probability that a call waits
+    if (u >= m) return 1;
+
+    let sum = 0;
+    for (let k = 0; k < m; k++) {
+      sum += Math.pow(u, k) / factorial(k);
+    }
+
+    const num = Math.pow(u, m) / (factorial(m) * (1 - u / m));
+    const denom = sum + num;
+    return num / denom;
+  }
+
+  function serviceLevel(m, u, targetDelay, aht) {
+    const pw = erlangC(m, u);
+    const sl = 1 - pw * Math.exp(-(m - u) * (targetDelay / aht));
+    return Math.max(0, Math.min(1, sl));
+  }
+
+  function findAgents(u, targetSL, targetDelay, aht) {
+    let m = Math.ceil(u);
+    while (m < 500) {
+      const sl = serviceLevel(m, u, targetDelay, aht);
+      if (sl >= targetSL) return m;
+      m++;
+    }
+    return m;
+  }
+
+  function calcErlang() {
+    const calls = parseInt(document.getElementById("erl-calls").value) || 0;
+    const aht = parseInt(document.getElementById("erl-aht").value) || 0;
+    const target = parseInt(document.getElementById("erl-target").value) || 80;
+    const delay = parseInt(document.getElementById("erl-delay").value) || 20;
+    const shrink = parseInt(document.getElementById("erl-shrink").value) || 0;
+
+    if (calls === 0 || aht === 0) { alert("Remplissez tous les champs."); return; }
+
+    const u = (calls * aht) / 3600;
+    const targetSL = target / 100;
+    const minAgents = findAgents(u, targetSL, delay, aht);
+    const agentsWithShrink = Math.ceil(minAgents / (1 - shrink / 100));
+    const pw = erlangC(minAgents, u);
+    const asa = (pw * aht) / (minAgents - u);
+
+    document.getElementById("erl-score").textContent = agentsWithShrink;
+    document.getElementById("r-erlang").textContent = u.toFixed(2);
+    document.getElementById("r-min").textContent = minAgents;
+    document.getElementById("r-shrink").textContent = agentsWithShrink;
+    document.getElementById("r-wait").textContent = (pw * 100).toFixed(1) + "%";
+    document.getElementById("r-asa").textContent = asa.toFixed(1) + " s";
+
+    let interpretation;
+    if (agentsWithShrink < 3) {
+      interpretation = "Equipe tres reduite. Un seul agent absent peut paralyser le service. Prevoyez du cross-training et un back-up.";
+    } else if (agentsWithShrink < 8) {
+      interpretation = "Petite equipe. Le dimensionnement est coherent. Surveillez les absences et planifiez les conges en avance.";
+    } else if (agentsWithShrink < 20) {
+      interpretation = "Equipe moyenne. Structurez par shifts. Verifiez que le shrinkage reel correspond au shrinkage theorique.";
+    } else {
+      interpretation = "Grande equipe. Erlang C donne une bonne base mais il faut affiner avec un outil WFM dedie. Decouplez par shift et par canal.";
+    }
+
+    document.getElementById("erl-interpretation").textContent = interpretation;
+    document.getElementById("result").style.display = "block";
+    document.getElementById("result-empty").style.display = "none";
+  }
+  document.getElementById("calc-btn").addEventListener("click", calcErlang);
+</script>

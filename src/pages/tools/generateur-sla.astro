@@ -1,0 +1,196 @@
+---
+import Base from '../../layouts/Base.astro';
+import AdSlot from '../../components/AdSlot.astro';
+import CalcCTA from '../../components/CalcCTA.astro';
+import { ui } from '../../i18n/ui';
+const lang = 'fr';
+const t = (k: string) => ui[lang][k as keyof typeof ui.fr] ?? k;
+---
+
+<Base lang={lang} page="tools" title="Générateur de SLA gratuit | Opsynapse" description="Générez un document SLA personnalisé pour votre service client. Choisissez vos canaux, objectifs et délais. Obtenez un SLA prêt à utiliser. Outil gratuit.">
+
+  <section class="page-header">
+    <div class="container">
+      <span class="hero-tag">{t('site.tagline')}</span>
+      <h1>Générateur de SLA</h1>
+      <p class="sub">Configurez vos objectifs de service par canal et générez un document SLA structuré, prêt à partager avec votre équipe ou vos clients.</p>
+    </div>
+  </section>
+
+  <section style="padding-top:24px">
+    <div class="container">
+      <div class="calc-layout">
+        <div class="calc-form">
+          <h2 class="calc-section-title">Configuration</h2>
+
+          <div class="calc-field">
+            <label for="sla-company">Nom de l'entreprise / équipe</label>
+            <input type="text" id="sla-company" placeholder="Ex: Service Client France" />
+          </div>
+
+          <div class="calc-field">
+            <label for="sla-period">Période de mesure</label>
+            <select id="sla-period">
+              <option value="jour">Jour</option>
+              <option value="semaine">Semaine</option>
+              <option value="mois" selected>Mois</option>
+              <option value="trimestre">Trimestre</option>
+            </select>
+          </div>
+
+          <h3 style="margin-top:20px;color:var(--accent);font-size:1rem">Canal : Appel téléphonique</h3>
+          <div class="calc-field">
+            <label for="call-target">Objectif de décroché (%)</label>
+            <input type="number" id="call-target" min="0" max="100" value="90" />
+          </div>
+          <div class="calc-field">
+            <label for="call-delay">Délai max de réponse (s)</label>
+            <input type="number" id="call-delay" min="0" value="60" />
+          </div>
+
+          <h3 style="margin-top:20px;color:var(--accent);font-size:1rem">Canal : Chat en direct</h3>
+          <div class="calc-field">
+            <label for="chat-target">Objectif de réponse (%)</label>
+            <input type="number" id="chat-target" min="0" max="100" value="95" />
+          </div>
+          <div class="calc-field">
+            <label for="chat-delay">Délai max de réponse (s)</label>
+            <input type="number" id="chat-delay" min="0" value="120" />
+          </div>
+
+          <h3 style="margin-top:20px;color:var(--accent);font-size:1rem">Canal : Email / Ticket</h3>
+          <div class="calc-field">
+            <label for="email-target">Objectif de réponse (%)</label>
+            <input type="number" id="email-target" min="0" max="100" value="90" />
+          </div>
+          <div class="calc-field">
+            <label for="email-delay">Délai max de réponse (h)</label>
+            <input type="number" id="email-delay" min="0" value="4" />
+          </div>
+
+          <button id="gen-btn" class="btn btn-primary calc-btn">Générer le SLA</button>
+        </div>
+
+        <div class="calc-result" id="result" style="display:none">
+          <div class="calc-breakdown">
+            <h3>Document SLA généré</h3>
+            <div id="sla-output" class="reply-output"></div>
+            <button id="copy-btn" class="btn btn-ghost" style="margin-top:16px">Copier</button>
+          </div>
+        </div>
+
+        <div class="calc-result calc-empty" id="result-empty">
+          <p>Configurez vos objectifs et cliquez sur Générer.</p>
+        </div>
+      </div>
+
+      <AdSlot slot="1111111115" />
+
+      <div class="calc-info">
+        <h2>Le SLA, c'est quoi ?</h2>
+        <p>Le SLA (Service Level Agreement) est l'engagement formel de votre équipe envers vos clients ou votre direction. Il définit les objectifs de qualité et de délai par canal.</p>
+        <p>Un bon SLA est : simple, mesurable, atteignable et partagé. Trop d'objectifs tuent l'objectif. 3 à 5 indicateurs maximum.</p>
+      </div>
+
+      <CalcCTA tool="Générateur de SLA" />
+
+      <p style="margin-top:32px"><a href="/tools" class="btn btn-ghost">← Retour aux outils</a></p>
+    </div>
+  </section>
+</Base>
+
+<style>
+  .reply-output {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 20px;
+    white-space: pre-wrap;
+    font-size: .92rem;
+    line-height: 1.7;
+    color: var(--text);
+    min-height: 200px;
+  }
+  .calc-field select {
+    width: 100%;
+    padding: 12px 16px;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    font-size: .95rem;
+    font-family: var(--font);
+    background: var(--bg);
+    color: var(--text);
+  }
+</style>
+
+<script is:inline>
+  document.getElementById("gen-btn").addEventListener("click", () => {
+    const company = document.getElementById("sla-company").value || "Service Client";
+    const period = document.getElementById("sla-period").value;
+    const callT = document.getElementById("call-target").value;
+    const callD = document.getElementById("call-delay").value;
+    const chatT = document.getElementById("chat-target").value;
+    const chatD = document.getElementById("chat-delay").value;
+    const emailT = document.getElementById("email-target").value;
+    const emailD = document.getElementById("email-delay").value;
+
+    const sla = `SLA SERVICE CLIENT - ${company.toUpperCase()}
+Période de mesure : par ${period}
+Date d'application : ${new Date().toLocaleDateString("fr-FR")}
+
+1. OBJECTIFS PAR CANAL
+
+1.1 Appel téléphonique
+- Taux de décroché : ${callT}% des appels répondus
+- Délai maximum de réponse : ${callD} secondes
+- Taux d'abandon cible : inférieur à ${Math.round(100 - callT)}%
+
+1.2 Chat en direct
+- Taux de réponse : ${chatT}% des chats initiés
+- Délai maximum de première réponse : ${chatD} secondes
+- Temps de résolution cible : inférieur à 10 minutes
+
+1.3 Email / Ticket
+- Taux de réponse dans les délais : ${emailT}%
+- Délai maximum de première réponse : ${emailD} heure(s)
+- Résolution cible : 24h ouvrées pour les tickets standards
+
+2. INDICATEURS DE QUALITÉ
+
+- CSAT (satisfaction client) : supérieur ou égal à 85%
+- NPS (Net Promoter Score) : supérieur ou égal à 30
+- FCR (résolution au premier contact) : supérieur ou égal à 70%
+
+3. SUIVI ET REPORTING
+
+- Reporting quotidien : KPI de la veille, alertes et priorités
+- Revue hebdomadaire : performance, tendances, actions
+- Revue mensuelle : bilan complet, focus du mois suivant
+
+4. ESCALADES
+
+- Niveau 1 : agent (traitement standard)
+- Niveau 2 : team leader (escalade complexe, SLA manqué)
+- Niveau 3 : manager (incident majeur, client VIP, réputation)
+
+5. CONDITIONS
+
+- Les objectifs s'appliquent sur les jours et heures d'ouverture contractuels
+- Les pics exceptionnels (campagne, incident) sont exclus du calcul
+- Une revue trimestrielle ajuste les objectifs si nécessaire
+
+Document généré par opsynapse.org - ${new Date().toLocaleDateString("fr-FR")}`;
+
+    document.getElementById("sla-output").textContent = sla;
+    document.getElementById("result").style.display = "block";
+    document.getElementById("result-empty").style.display = "none";
+  });
+
+  document.getElementById("copy-btn").addEventListener("click", () => {
+    const text = document.getElementById("sla-output").textContent;
+    navigator.clipboard.writeText(text);
+    const btn = document.getElementById("copy-btn");
+    btn.textContent = "Copié !";
+    setTimeout(() => { btn.textContent = "Copier"; }, 2000);
+  });
+</script>
