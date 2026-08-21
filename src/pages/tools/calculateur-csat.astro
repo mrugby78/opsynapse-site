@@ -1,0 +1,190 @@
+---
+import Base from '../../layouts/Base.astro';
+import AdSlot from '../../components/AdSlot.astro';
+import CalcCTA from '../../components/CalcCTA.astro';
+import { ui } from '../../i18n/ui';
+const lang = 'fr';
+const t = (k: string) => ui[lang][k as keyof typeof ui.fr] ?? k;
+---
+
+<Base lang={lang} page="tools" title="Calculateur de CSAT (Customer Satisfaction) gratuit | Opsynapse" description="Calculez votre score de satisfaction client (CSAT) en temps réel. Entrez le nombre de clients satisfaits et insatisfaits par canal. Obtenez votre pourcentage et comparez aux benchmarks. Outil gratuit.">
+
+  <section class="page-header">
+    <div class="container">
+      <span class="hero-tag">{t('site.tagline')}</span>
+      <h1>Calculateur de CSAT</h1>
+      <p class="sub">Calculez votre Customer Satisfaction Score. Entrez le nombre de clients satisfaits et insatisfaits par canal (appel, chat, ticket), obtenez votre pourcentage global et par canal.</p>
+    </div>
+  </section>
+
+  <section style="padding-top:24px">
+    <div class="container">
+      <div class="calc-layout">
+        <div class="calc-form">
+          <h2 class="calc-section-title">Vos données</h2>
+          <p class="calc-section-desc">Données sur une période (jour, semaine, mois) :</p>
+
+          <h3 style="margin-top:8px;color:var(--accent);font-size:1rem">Appels téléphoniques</h3>
+          <div class="calc-field">
+            <label for="call-sat">Clients satisfaits</label>
+            <input type="number" id="call-sat" min="0" value="0" />
+          </div>
+          <div class="calc-field">
+            <label for="call-unsat">Clients insatisfaits</label>
+            <input type="number" id="call-unsat" min="0" value="0" />
+          </div>
+
+          <h3 style="margin-top:16px;color:var(--accent);font-size:1rem">Chat en direct</h3>
+          <div class="calc-field">
+            <label for="chat-sat">Clients satisfaits</label>
+            <input type="number" id="chat-sat" min="0" value="0" />
+          </div>
+          <div class="calc-field">
+            <label for="chat-unsat">Clients insatisfaits</label>
+            <input type="number" id="chat-unsat" min="0" value="0" />
+          </div>
+
+          <h3 style="margin-top:16px;color:var(--accent);font-size:1rem">Tickets (email / Jira / Zendesk)</h3>
+          <div class="calc-field">
+            <label for="ticket-sat">Clients satisfaits</label>
+            <input type="number" id="ticket-sat" min="0" value="0" />
+          </div>
+          <div class="calc-field">
+            <label for="ticket-unsat">Clients insatisfaits</label>
+            <input type="number" id="ticket-unsat" min="0" value="0" />
+          </div>
+
+          <button id="calc-btn" class="btn btn-primary calc-btn">Calculer</button>
+        </div>
+
+        <div class="calc-result" id="result" style="display:none">
+          <div class="calc-score-block">
+            <span class="calc-score-label">CSAT global</span>
+            <div class="calc-score" id="csat-score">--</div>
+            <span class="calc-score-status" id="csat-status">--</span>
+          </div>
+
+          <div class="calc-breakdown">
+            <h3>CSAT par canal</h3>
+            <table class="calc-table">
+              <tbody>
+                <tr><td>Appels téléphoniques</td><td><strong id="r-csat-call">--</strong></td></tr>
+                <tr><td>Chat en direct</td><td><strong id="r-csat-chat">--</strong></td></tr>
+                <tr><td>Tickets</td><td><strong id="r-csat-ticket">--</strong></td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="calc-breakdown">
+            <h3>Détail</h3>
+            <table class="calc-table">
+              <tbody>
+                <tr><td>Total satisfaits</td><td><strong id="r-total-sat">--</strong></td></tr>
+                <tr><td>Total insatisfaits</td><td><strong id="r-total-unsat">--</strong></td></tr>
+                <tr><td>Total réponses</td><td><strong id="r-total-resp">--</strong></td></tr>
+                <tr><td>Taux de réponse</td><td><strong id="r-resp-rate">--</strong></td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="calc-benchmark">
+            <h3>Interprétation</h3>
+            <p id="csat-interpretation">--</p>
+          </div>
+
+          <div class="calc-benchmark">
+            <h3>Benchmarks CSAT par canal</h3>
+            <table class="calc-table">
+              <thead>
+                <tr><th>Canal</th><th>CSAT moyen</th></tr>
+              </thead>
+              <tbody>
+                <tr><td>Chat en direct</td><td>85-92%</td></tr>
+                <tr><td>Appel téléphonique</td><td>80-88%</td></tr>
+                <tr><td>Email</td><td>85-90%</td></tr>
+                <tr><td>Global (tous canaux)</td><td>85-90%</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="calc-result calc-empty" id="result-empty">
+          <p>Entrez vos chiffres et cliquez sur Calculer.</p>
+        </div>
+      </div>
+
+      <AdSlot slot="7777777777" />
+
+      <div class="calc-info">
+        <h2>Le CSAT, c'est quoi ?</h2>
+        <p>Le CSAT (Customer Satisfaction Score) mesure la satisfaction immédiate après une interaction. On pose la question : "Comment évalueriez-vous votre satisfaction suite à cet échange ?" sur une échelle (souvent 1-5 ou 1-10).</p>
+        <p>La formule : <strong>CSAT = (Clients satisfaits / Total des réponses) x 100</strong></p>
+        <p>Contrairement au NPS qui mesure la fidélité long terme, le CSAT mesure la qualité d'un point de contact précis. C'est l'indicateur à suivre pour piloter la qualité opérationnelle par canal.</p>
+      </div>
+
+      <CalcCTA tool="Calculateur CSAT" />
+
+      <p style="margin-top:32px"><a href="/tools" class="btn btn-ghost">← Retour aux outils</a></p>
+    </div>
+  </section>
+</Base>
+
+<script is:inline>
+  function calcCSAT() {
+    const callSat = parseInt(document.getElementById("call-sat").value) || 0;
+    const callUnsat = parseInt(document.getElementById("call-unsat").value) || 0;
+    const chatSat = parseInt(document.getElementById("chat-sat").value) || 0;
+    const chatUnsat = parseInt(document.getElementById("chat-unsat").value) || 0;
+    const ticketSat = parseInt(document.getElementById("ticket-sat").value) || 0;
+    const ticketUnsat = parseInt(document.getElementById("ticket-unsat").value) || 0;
+
+    const totalSat = callSat + chatSat + ticketSat;
+    const totalUnsat = callUnsat + chatUnsat + ticketUnsat;
+    const totalResp = totalSat + totalUnsat;
+
+    if (totalResp === 0) {
+      alert("Entrez au moins une valeur.");
+      return;
+    }
+
+    const csatGlobal = (totalSat / totalResp) * 100;
+    const csatCall = (callSat + callUnsat) > 0 ? (callSat / (callSat + callUnsat)) * 100 : null;
+    const csatChat = (chatSat + chatUnsat) > 0 ? (chatSat / (chatSat + chatUnsat)) * 100 : null;
+    const csatTicket = (ticketSat + ticketUnsat) > 0 ? (ticketSat / (ticketSat + ticketUnsat)) * 100 : null;
+
+    document.getElementById("csat-score").textContent = csatGlobal.toFixed(1) + "%";
+    document.getElementById("r-csat-call").textContent = csatCall !== null ? csatCall.toFixed(1) + "%" : "N/A";
+    document.getElementById("r-csat-chat").textContent = csatChat !== null ? csatChat.toFixed(1) + "%" : "N/A";
+    document.getElementById("r-csat-ticket").textContent = csatTicket !== null ? csatTicket.toFixed(1) + "%" : "N/A";
+    document.getElementById("r-total-sat").textContent = totalSat;
+    document.getElementById("r-total-unsat").textContent = totalUnsat;
+    document.getElementById("r-total-resp").textContent = totalResp;
+    document.getElementById("r-resp-rate").textContent = "voir taux d'envoi";
+
+    let status, interpretation;
+    if (csatGlobal >= 90) {
+      status = "Excellent";
+      interpretation = "Votre CSAT est excellent. Vos clients sont tres satisfaits de leurs interactions. Maintenez ce niveau et identifiez les agents qui performent le mieux pour les utiliser comme modele.";
+    } else if (csatGlobal >= 85) {
+      status = "Bon";
+      interpretation = "Votre CSAT est bon. C'est la moyenne du marche. Cherchez les canaux ou agents sous-performants et ciblez le coaching sur eux.";
+    } else if (csatGlobal >= 75) {
+      status = "Moyen";
+      interpretation = "Votre CSAT est moyen. Pres de 1 client sur 4 est insatisfait. Analysez les motifs d'insatisfaction par canal et agissez sur les process.";
+    } else {
+      status = "A ameliorer";
+      interpretation = "Votre CSAT est bas. Plus d'un client sur 4 est insatisfait. C'est un signal d'alarme : verifiez la formation des agents, la charge de travail et la qualite des outils.";
+    }
+
+    document.getElementById("csat-status").textContent = status;
+    document.getElementById("csat-interpretation").textContent = interpretation;
+    document.getElementById("result").style.display = "block";
+    document.getElementById("result-empty").style.display = "none";
+
+    const scoreColor = csatGlobal >= 90 ? "#2e7d32" : csatGlobal >= 85 ? "#8a6d1f" : csatGlobal >= 75 ? "#e65100" : "#c62828";
+    document.getElementById("csat-score").style.color = scoreColor;
+    document.getElementById("csat-status").style.color = scoreColor;
+  }
+
+  document.getElementById("calc-btn").addEventListener("click", calcCSAT);
+</script>

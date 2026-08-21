@@ -4,7 +4,9 @@ import { ui } from '../i18n/ui';
 const lang = 'fr';
 const t = (k: string) => ui[lang][k as keyof typeof ui.fr] ?? k;
 ---
-<Base lang={lang} page="contact">
+
+<Base lang={lang} page="contact" title="Contact | Opsynapse" description="Contactez Romain Pinsard pour échanger sur une opportunité, un projet ou une collaboration autour du pilotage de service client par les indicateurs.">
+
   <section class="page-header">
     <div class="container">
       <span class="hero-tag">{t('site.tagline')}</span>
@@ -12,12 +14,163 @@ const t = (k: string) => ui[lang][k as keyof typeof ui.fr] ?? k;
       <p class="sub">{t('contact.intro')}</p>
     </div>
   </section>
+
   <section style="padding-top:24px">
     <div class="container">
-      <ul class="contact-list">
-        <li><span class="label">{t('contact.email')}</span><span class="value">romain.pinsard@gmail.com</span></li>
-        <li><span class="label">{t('contact.linkedin')}</span><span class="value">linkedin.com/in/romainpinsard</span></li>
-      </ul>
+      <div class="contact-layout">
+        <div class="contact-info">
+          <h2>Autres moyens</h2>
+          <ul class="contact-list">
+            <li><span class="label">{t('contact.email')}</span><span class="value">romain.pinsard@gmail.com</span></li>
+            <li><span class="label">{t('contact.linkedin')}</span><span class="value">linkedin.com/in/romainpinsard</span></li>
+            <li><span class="label">{t('contact.location')}</span><span class="value">Saint-Germain-en-Laye, France</span></li>
+          </ul>
+        </div>
+
+        <div class="contact-form-wrap">
+          <h2>Envoyez un message</h2>
+          <p class="contact-form-sub">Réponse sous 24-48h.</p>
+          <form id="contact-form" class="contact-form">
+            <div class="form-row">
+              <div class="form-field">
+                <label for="c-name">Nom *</label>
+                <input type="text" id="c-name" name="name" required />
+              </div>
+              <div class="form-field">
+                <label for="c-email">Email *</label>
+                <input type="email" id="c-email" name="email" required />
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-field">
+                <label for="c-company">Entreprise</label>
+                <input type="text" id="c-company" name="company" />
+              </div>
+              <div class="form-field">
+                <label for="c-subject">Sujet</label>
+                <input type="text" id="c-subject" name="subject" />
+              </div>
+            </div>
+            <div class="form-field">
+              <label for="c-message">Message *</label>
+              <textarea id="c-message" name="message" rows="5" required></textarea>
+            </div>
+            <button type="submit" class="btn btn-primary contact-submit">Envoyer</button>
+            <p id="contact-feedback" class="contact-feedback"></p>
+          </form>
+        </div>
+      </div>
     </div>
   </section>
 </Base>
+
+<style>
+  .contact-layout {
+    display: grid;
+    grid-template-columns: 1fr 1.5fr;
+    gap: 48px;
+    align-items: start;
+  }
+  .contact-info h2, .contact-form-wrap h2 {
+    margin-bottom: 20px;
+    color: var(--accent);
+  }
+  .contact-form-sub {
+    color: var(--text-dim);
+    font-size: .9rem;
+    margin-bottom: 24px;
+  }
+  .contact-form {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+  .form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+  }
+  .form-field label {
+    display: block;
+    font-weight: 600;
+    font-size: .88rem;
+    margin-bottom: 6px;
+  }
+  .form-field input, .form-field textarea {
+    width: 100%;
+    padding: 12px 16px;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    font-size: .95rem;
+    font-family: var(--font);
+    background: var(--bg);
+    color: var(--text);
+    transition: border-color .2s;
+  }
+  .form-field input:focus, .form-field textarea:focus {
+    outline: none;
+    border-color: var(--accent);
+  }
+  .form-field textarea {
+    resize: vertical;
+    min-height: 120px;
+  }
+  .contact-submit {
+    align-self: flex-start;
+    cursor: pointer;
+  }
+  .contact-feedback {
+    font-size: .9rem;
+    margin-top: 8px;
+  }
+  .contact-feedback.success { color: #2e7d32; }
+  .contact-feedback.error { color: #c62828; }
+  @media (max-width: 768px) {
+    .contact-layout { grid-template-columns: 1fr; }
+    .form-row { grid-template-columns: 1fr; }
+  }
+</style>
+
+<script is:inline>
+  const form = document.getElementById('contact-form');
+  const feedback = document.getElementById('contact-feedback');
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const btn = form.querySelector('.contact-submit');
+    btn.disabled = true;
+    btn.textContent = 'Envoi...';
+    feedback.textContent = '';
+    feedback.className = 'contact-feedback';
+
+    const data = {
+      name: document.getElementById('c-name').value,
+      email: document.getElementById('c-email').value,
+      company: document.getElementById('c-company').value,
+      subject: document.getElementById('c-subject').value,
+      message: document.getElementById('c-message').value,
+    };
+
+    try {
+      const res = await fetch('/api/contact', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data),
+      });
+      const json = await res.json();
+      if (res.ok) {
+        feedback.textContent = 'Message envoyé. Je vous réponds sous 24-48h.';
+        feedback.classList.add('success');
+        form.reset();
+      } else {
+        feedback.textContent = json.error || 'Erreur lors de l\'envoi.';
+        feedback.classList.add('error');
+      }
+    } catch (err) {
+      feedback.textContent = 'Erreur réseau. Réessayez ou écrivez à romain.pinsard@gmail.com';
+      feedback.classList.add('error');
+    }
+    btn.disabled = false;
+    btn.textContent = 'Envoyer';
+  });
+</script>

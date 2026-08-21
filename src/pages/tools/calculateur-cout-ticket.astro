@@ -1,17 +1,18 @@
 ---
 import Base from '../../layouts/Base.astro';
 import AdSlot from '../../components/AdSlot.astro';
+import CalcCTA from '../../components/CalcCTA.astro';
 import { ui } from '../../i18n/ui';
 const lang = 'fr';
 const t = (k: string) => ui[lang][k as keyof typeof ui.fr] ?? k;
 ---
 
-<Base lang={lang} page="tools" title="Calculateur de coût par ticket service client gratuit | Opsynapse" description="Calculez le coût unitaire de chaque ticket traité. Entrez les salaires, outils et volume de tickets. Comparez aux benchmarks par modèle de support. Outil gratuit pour ops managers.">
+<Base lang={lang} page="tools" title="Calculateur de coût par contact service client gratuit | Opsynapse" description="Calculez le coût unitaire de chaque contact (appel, chat, ticket). Entrez les salaires, outils et volumes par canal. Comparez aux benchmarks par modèle de support. Outil gratuit pour ops managers.">
   <section class="page-header">
     <div class="container">
       <span class="hero-tag">{t('site.tagline')}</span>
-      <h1>Calculateur de coût par ticket</h1>
-      <p class="sub">Calculez combien vous coûte chaque ticket traité. Entrez le coût total de votre équipe et le volume de tickets, obtenez le coût unitaire et comparez aux benchmarks.</p>
+      <h1>Calculateur de coût par contact</h1>
+      <p class="sub">Calculez combien vous coûte chaque contact (appel, chat, ticket) traité. Entrez le coût total de votre équipe et les volumes par canal, obtenez le coût unitaire et comparez aux benchmarks.</p>
     </div>
   </section>
 
@@ -40,10 +41,24 @@ const t = (k: string) => ui[lang][k as keyof typeof ui.fr] ?? k;
             <span class="calc-field-hint">Loyer, telecom, formation, management</span>
           </div>
 
+          <h3 style="margin-top:24px;color:var(--accent);font-size:1rem">Volumes par canal / mois</h3>
+
           <div class="calc-field">
-            <label for="tickets">Nombre de tickets / mois</label>
-            <input type="number" id="tickets" min="0" value="0" />
-            <span class="calc-field-hint">Tous canaux confondus</span>
+            <label for="vol-calls">Appels téléphoniques</label>
+            <input type="number" id="vol-calls" min="0" value="0" />
+            <span class="calc-field-hint">Nombre d'appels traités</span>
+          </div>
+
+          <div class="calc-field">
+            <label for="vol-chat">Chat en direct</label>
+            <input type="number" id="vol-chat" min="0" value="0" />
+            <span class="calc-field-hint">Conversations chat traitées</span>
+          </div>
+
+          <div class="calc-field">
+            <label for="vol-tickets">Tickets (email / Jira / Zendesk)</label>
+            <input type="number" id="vol-tickets" min="0" value="0" />
+            <span class="calc-field-hint">Emails et tickets traités</span>
           </div>
 
           <button id="calc-btn" class="btn btn-primary calc-btn">Calculer</button>
@@ -51,9 +66,20 @@ const t = (k: string) => ui[lang][k as keyof typeof ui.fr] ?? k;
 
         <div class="calc-result" id="result" style="display:none">
           <div class="calc-score-block">
-            <span class="calc-score-label">Coût par ticket</span>
+            <span class="calc-score-label">Coût par contact (moyenne)</span>
             <div class="calc-score" id="cpt-score">--</div>
             <span class="calc-score-status" id="cpt-status">--</span>
+          </div>
+
+          <div class="calc-breakdown">
+            <h3>Coût par canal</h3>
+            <table class="calc-table">
+              <tbody>
+                <tr><td>Coût par appel</td><td><strong id="r-cost-call">--</strong> €</td></tr>
+                <tr><td>Coût par chat</td><td><strong id="r-cost-chat">--</strong> €</td></tr>
+                <tr><td>Coût par ticket</td><td><strong id="r-cost-ticket">--</strong> €</td></tr>
+              </tbody>
+            </table>
           </div>
 
           <div class="calc-breakdown">
@@ -64,8 +90,7 @@ const t = (k: string) => ui[lang][k as keyof typeof ui.fr] ?? k;
                 <tr><td>Outils et licences</td><td><strong id="r-tools">--</strong> €</td></tr>
                 <tr><td>Autres coûts</td><td><strong id="r-other">--</strong> €</td></tr>
                 <tr><td>Coût total / mois</td><td><strong id="r-total">--</strong> €</td></tr>
-                <tr><td>Tickets / mois</td><td><strong id="r-tickets">--</strong></td></tr>
-                <tr><td>Coût par ticket</td><td><strong id="r-cpt">--</strong> €</td></tr>
+                <tr><td>Total contacts / mois</td><td><strong id="r-contacts">--</strong></td></tr>
               </tbody>
             </table>
           </div>
@@ -100,11 +125,13 @@ const t = (k: string) => ui[lang][k as keyof typeof ui.fr] ?? k;
       <AdSlot slot="4444444444" />
 
       <div class="calc-info">
-        <h2>Le coût par ticket, c'est quoi ?</h2>
-        <p>Le coût par ticket (Cost Per Ticket) est le coût total de votre équipe divisé par le nombre de tickets traités. C'est l'indicateur clé pour piloter l'efficacité opérationnelle.</p>
-        <p>La formule : <strong>Coût par ticket = (Salaires + Outils + Autres coûts) / Nombre de tickets</strong></p>
-        <p>Pour réduire ce coût : automatisez les questions répétitives (FAQ, chatbot), optimisez le temps de traitement (AHT), et augmentez l'auto-service (help center, base de connaissances).</p>
+        <h2>Le coût par contact, c'est quoi ?</h2>
+        <p>Le coût par contact (Cost Per Contact) est le coût total de votre équipe divisé par le nombre de contacts traités, tous canaux confondus. C'est l'indicateur clé pour piloter l'efficacité opérationnelle.</p>
+        <p>La formule : <strong>Coût par contact = (Salaires + Outils + Autres coûts) / Total des contacts</strong></p>
+        <p>Chaque canal a un coût différent : un appel coûte 3 à 4 fois plus cher qu'un chat, qui coûte 2 fois plus cher qu'un ticket email. Comprendre cette répartition permet de piloter la stratégie de déflection (pousser les clients vers les canaux les moins chers sans sacrifier la satisfaction).</p>
       </div>
+
+      <CalcCTA tool="Calculateur coût par contact" />
 
       <p style="margin-top:32px"><a href="/tools" class="btn btn-ghost">← Retour aux outils</a></p>
     </div>
@@ -116,37 +143,51 @@ const t = (k: string) => ui[lang][k as keyof typeof ui.fr] ?? k;
     const salaries = parseFloat(document.getElementById("salaries").value) || 0;
     const tools = parseFloat(document.getElementById("tools").value) || 0;
     const other = parseFloat(document.getElementById("other").value) || 0;
-    const tickets = parseInt(document.getElementById("tickets").value) || 0;
+    const volCalls = parseInt(document.getElementById("vol-calls").value) || 0;
+    const volChat = parseInt(document.getElementById("vol-chat").value) || 0;
+    const volTickets = parseInt(document.getElementById("vol-tickets").value) || 0;
+    const totalContacts = volCalls + volChat + volTickets;
 
-    if (tickets === 0) {
-      alert("Entrez un nombre de tickets.");
+    if (totalContacts === 0) {
+      alert("Entrez au moins un volume par canal.");
       return;
     }
 
     const total = salaries + tools + other;
-    const cpt = total / tickets;
+    const avgCost = total / totalContacts;
 
-    document.getElementById("cpt-score").textContent = cpt.toFixed(2) + " €";
+    const callWeight = 3;
+    const chatWeight = 1.5;
+    const ticketWeight = 1;
+    const totalWeight = (volCalls * callWeight) + (volChat * chatWeight) + (volTickets * ticketWeight);
+    const costPerUnit = totalWeight > 0 ? total / totalWeight : 0;
+    const costCall = volCalls > 0 ? costPerUnit * callWeight : 0;
+    const costChat = volChat > 0 ? costPerUnit * chatWeight : 0;
+    const costTicket = volTickets > 0 ? costPerUnit * ticketWeight : 0;
+
+    document.getElementById("cpt-score").textContent = avgCost.toFixed(2) + " €";
+    document.getElementById("r-cost-call").textContent = volCalls > 0 ? costCall.toFixed(2) + " €" : "N/A";
+    document.getElementById("r-cost-chat").textContent = volChat > 0 ? costChat.toFixed(2) + " €" : "N/A";
+    document.getElementById("r-cost-ticket").textContent = volTickets > 0 ? costTicket.toFixed(2) + " €" : "N/A";
     document.getElementById("r-salaries").textContent = salaries.toLocaleString("fr-FR");
     document.getElementById("r-tools").textContent = tools.toLocaleString("fr-FR");
     document.getElementById("r-other").textContent = other.toLocaleString("fr-FR");
     document.getElementById("r-total").textContent = total.toLocaleString("fr-FR");
-    document.getElementById("r-tickets").textContent = tickets.toLocaleString("fr-FR");
-    document.getElementById("r-cpt").textContent = cpt.toFixed(2) + " €";
+    document.getElementById("r-contacts").textContent = totalContacts.toLocaleString("fr-FR");
 
     let status, interpretation;
-    if (cpt < 3) {
-      status = "Très efficace";
-      interpretation = "Votre cout par ticket est tres bas. Vous etes probablement dans un modele hautement automatise. Attention a ne pas sacrifier la qualite pour le cout.";
-    } else if (cpt < 8) {
+    if (avgCost < 3) {
+      status = "Tres efficace";
+      interpretation = "Votre cout par contact est tres bas. Vous etes probablement dans un modele hautement automatise. Attention a ne pas sacrifier la qualite pour le cout.";
+    } else if (avgCost < 8) {
       status = "Efficace";
-      interpretation = "Votre cout par ticket est dans la fourchette efficace. Bon equilibre entre cout et qualite. Cherchez a automatiser plus pour passer sous 5 €.";
-    } else if (cpt < 15) {
+      interpretation = "Votre cout par contact est dans la fourchette efficace. Bon equilibre entre cout et qualite. Cherchez a automatiser plus pour passer sous 5 €.";
+    } else if (avgCost < 15) {
       status = "Standard";
-      interpretation = "Votre cout par ticket est dans la moyenne. Il y a de la marge. Identifiez les types de tickets les plus couteux et automatisez-les en priorite.";
+      interpretation = "Votre cout par contact est dans la moyenne. Il y a de la marge. Identifiez les canaux les plus couteux et poussez la deflection vers les canaux les moins chers.";
     } else {
       status = "A optimiser";
-      interpretation = "Votre cout par ticket est eleve. Causes probables : trop de calls vs emails, faible automatisation, temps de traitement long. Cible : passer sous 10 € via self-service et IA.";
+      interpretation = "Votre cout par contact est eleve. Causes probables : trop de calls vs chats/emails, faible automatisation, temps de traitement long. Cible : passer sous 10 € via self-service et IA.";
     }
 
     document.getElementById("cpt-status").textContent = status;
@@ -154,7 +195,7 @@ const t = (k: string) => ui[lang][k as keyof typeof ui.fr] ?? k;
     document.getElementById("result").style.display = "block";
     document.getElementById("result-empty").style.display = "none";
 
-    const scoreColor = cpt < 3 ? "#2e7d32" : cpt < 8 ? "#8a6d1f" : cpt < 15 ? "#e65100" : "#c62828";
+    const scoreColor = avgCost < 3 ? "#2e7d32" : avgCost < 8 ? "#8a6d1f" : avgCost < 15 ? "#e65100" : "#c62828";
     document.getElementById("cpt-score").style.color = scoreColor;
     document.getElementById("cpt-status").style.color = scoreColor;
   }

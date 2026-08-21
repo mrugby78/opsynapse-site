@@ -1,0 +1,158 @@
+---
+import Base from '../../layouts/Base.astro';
+import AdSlot from '../../components/AdSlot.astro';
+import CalcCTA from '../../components/CalcCTA.astro';
+import { ui } from '../../i18n/ui';
+const lang = 'fr';
+const t = (k: string) => ui[lang][k as keyof typeof ui.fr] ?? k;
+---
+
+<Base lang={lang} page="tools" title="Calculateur de taux d'abandon d'appels gratuit | Opsynapse" description="Calculez votre taux d'abandon d'appels (Abandon Rate). Entrez le nombre d'appels abandonnés et le nombre total d'appels reçus. Comparez aux standards du secteur. Outil gratuit service client.">
+
+  <section class="page-header">
+    <div class="container">
+      <span class="hero-tag">{t('site.tagline')}</span>
+      <h1>Calculateur de taux d'abandon d'appels</h1>
+      <p class="sub">Calculez votre Abandon Rate. Entrez le nombre d'appels abandonnés par les clients et le total des appels reçus. Obtenez votre taux et l'impact sur la satisfaction.</p>
+    </div>
+  </section>
+
+  <section style="padding-top:24px">
+    <div class="container">
+      <div class="calc-layout">
+        <div class="calc-form">
+          <h2 class="calc-section-title">Vos données</h2>
+          <p class="calc-section-desc">Données sur une période (jour, semaine, mois) :</p>
+
+          <div class="calc-field">
+            <label for="abandoned">Appels abandonnés</label>
+            <input type="number" id="abandoned" min="0" value="0" />
+            <span class="calc-field-hint">Appels où le client a raccroché avant de parler à un agent</span>
+          </div>
+
+          <div class="calc-field">
+            <label for="total-calls">Total des appels reçus</label>
+            <input type="number" id="total-calls" min="0" value="0" />
+            <span class="calc-field-hint">Tous les appels entrants (répondus + abandonnés)</span>
+          </div>
+
+          <div class="calc-field">
+            <label for="wait-time">Temps d'attente moyen avant abandon (s)</label>
+            <input type="number" id="wait-time" min="0" value="0" />
+            <span class="calc-field-hint">Combien de temps le client a attendu avant de raccrocher</span>
+          </div>
+
+          <button id="calc-btn" class="btn btn-primary calc-btn">Calculer</button>
+        </div>
+
+        <div class="calc-result" id="result" style="display:none">
+          <div class="calc-score-block">
+            <span class="calc-score-label">Taux d'abandon</span>
+            <div class="calc-score" id="ar-score">--</div>
+            <span class="calc-score-status" id="ar-status">--</span>
+          </div>
+
+          <div class="calc-breakdown">
+            <h3>Détail</h3>
+            <table class="calc-table">
+              <tbody>
+                <tr><td>Appels abandonnés</td><td><strong id="r-abandoned">--</strong></td></tr>
+                <tr><td>Total des appels</td><td><strong id="r-total">--</strong></td></tr>
+                <tr><td>Appels répondus</td><td><strong id="r-answered">--</strong></td></tr>
+                <tr><td>Temps d'attente moyen avant abandon</td><td><strong id="r-wait">--</strong> s</td></tr>
+                <tr><td>Appels perdus estimés (clients qui ne rappellent pas)</td><td><strong id="r-lost">--</strong></td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="calc-benchmark">
+            <h3>Interprétation</h3>
+            <p id="ar-interpretation">--</p>
+          </div>
+
+          <div class="calc-benchmark">
+            <h3>Benchmarks abandon rate</h3>
+            <table class="calc-table">
+              <thead>
+                <tr><th>Type de centre</th><th>Taux d'abandon cible</th></tr>
+              </thead>
+              <tbody>
+                <tr><td>Centre d'appels entrants (standard)</td><td>Moins de 5%</td></tr>
+                <tr><td>Support client premium</td><td>Moins de 3%</td></tr>
+                <tr><td>Support technique</td><td>Moins de 7%</td></tr>
+                <tr><td>Sales / prospection entrante</td><td>Moins de 2%</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="calc-result calc-empty" id="result-empty">
+          <p>Entrez vos chiffres et cliquez sur Calculer.</p>
+        </div>
+      </div>
+
+      <AdSlot slot="9999999999" />
+
+      <div class="calc-info">
+        <h2>Le taux d'abandon, c'est quoi ?</h2>
+        <p>Le taux d'abandon (Abandon Rate) est le pourcentage d'appels où le client raccroche avant d'avoir parlé à un agent. C'est l'indicateur le plus direct de la frustration client en phone.</p>
+        <p>La formule : <strong>Abandon Rate = (Appels abandonnés / Total des appels reçus) x 100</strong></p>
+        <p>Un client qui raccroche est un client perdu. Selon les études, 30 à 50% des clients qui abandonnent un appel ne rappellent jamais. Ça veut dire une vente perdue ou un client qui part chez la concurrence.</p>
+      </div>
+
+      <CalcCTA tool="Calculateur abandon appels" />
+
+      <p style="margin-top:32px"><a href="/tools" class="btn btn-ghost">← Retour aux outils</a></p>
+    </div>
+  </section>
+</Base>
+
+<script is:inline>
+  function calcAR() {
+    const abandoned = parseInt(document.getElementById("abandoned").value) || 0;
+    const total = parseInt(document.getElementById("total-calls").value) || 0;
+    const wait = parseInt(document.getElementById("wait-time").value) || 0;
+
+    if (total === 0) {
+      alert("Entrez un total d'appels.");
+      return;
+    }
+
+    const rate = (abandoned / total) * 100;
+    const answered = total - abandoned;
+    const lost = Math.round(abandoned * 0.4);
+
+    document.getElementById("ar-score").textContent = rate.toFixed(1) + "%";
+    document.getElementById("r-abandoned").textContent = abandoned;
+    document.getElementById("r-total").textContent = total;
+    document.getElementById("r-answered").textContent = answered;
+    document.getElementById("r-wait").textContent = wait;
+    document.getElementById("r-lost").textContent = lost;
+
+    let status, interpretation;
+    if (rate < 3) {
+      status = "Excellent";
+      interpretation = "Votre taux d'abandon est excellent. Vos clients ne patientent pas trop longtemps. Maintenez le dimensionnement pour absorber les pics.";
+    } else if (rate < 5) {
+      status = "Bon";
+      interpretation = "Votre taux d'abandon est bon. Dans la norme du marche. Surveillez les creneaux de pointe et ajustez les shifts si le taux remonte.";
+    } else if (rate < 8) {
+      status = "Moyen";
+      interpretation = "Votre taux d'abandon est moyen. " + lost + " clients sont perdus estimes. Causes probables : sous-effectif sur les pics, temps d'attente trop long. Ajustez le dimensionnement.";
+    } else {
+      status = "Critique";
+      interpretation = "Votre taux d'abandon est critique. Plus de 8% des appels sont abandonnes. " + lost + " clients sont perdus estimes. Action immediate requise : renfort d'effectif, rappel automatique, ou self-service pour reduire le volume entrant.";
+    }
+
+    document.getElementById("ar-status").textContent = status;
+    document.getElementById("ar-interpretation").textContent = interpretation;
+    document.getElementById("result").style.display = "block";
+    document.getElementById("result-empty").style.display = "none";
+
+    const scoreColor = rate < 3 ? "#2e7d32" : rate < 5 ? "#8a6d1f" : rate < 8 ? "#e65100" : "#c62828";
+    document.getElementById("ar-score").style.color = scoreColor;
+    document.getElementById("ar-status").style.color = scoreColor;
+  }
+
+  document.getElementById("calc-btn").addEventListener("click", calcAR);
+</script>

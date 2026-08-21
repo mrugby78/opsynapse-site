@@ -1,0 +1,32 @@
+---
+const { tool = '' } = Astro.props;
+---
+<div class="calc-cta">
+  <div class="calc-cta-inner">
+    <h3>Besoin d'aide pour piloter votre service client ?</h3>
+    <p>Méthode éprouvée en production, transposable à votre activité. Audit, mise en place, formation de votre équipe.</p>
+    <a href="/contact" class="btn btn-primary">Me contacter</a>
+  </div>
+</div>
+
+<style>
+  .calc-cta {
+    background: var(--bg-soft);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 32px;
+    margin: 32px 0;
+    text-align: center;
+  }
+  .calc-cta h3 {
+    color: var(--accent);
+    margin-bottom: 12px;
+  }
+  .calc-cta p {
+    color: var(--text-dim);
+    margin-bottom: 20px;
+    max-width: 480px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+</style>

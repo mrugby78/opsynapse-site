@@ -1,6 +1,7 @@
 ---
 import Base from '../../layouts/Base.astro';
 import AdSlot from '../../components/AdSlot.astro';
+import CalcCTA from '../../components/CalcCTA.astro';
 import { ui } from '../../i18n/ui';
 const lang = 'fr';
 const t = (k: string) => ui[lang][k as keyof typeof ui.fr] ?? k;
@@ -99,6 +100,8 @@ const t = (k: string) => ui[lang][k as keyof typeof ui.fr] ?? k;
         <p>La formule : <strong>Churn mensuel = (clients perdus dans le mois / clients en début de mois) x 100</strong></p>
         <p>Réduire le churn de 1 point peut représenter des milliers d'euros. Un client conservé coûte 5 à 7 fois moins cher qu'un client acquis. C'est pour ça que le Customer Success existe.</p>
       </div>
+
+      <CalcCTA tool="Calculateur churn" />
 
       <p style="margin-top:32px"><a href="/tools" class="btn btn-ghost">← Retour aux outils</a></p>
     </div>

@@ -1,0 +1,190 @@
+---
+import Base from '../../layouts/Base.astro';
+import AdSlot from '../../components/AdSlot.astro';
+import CalcCTA from '../../components/CalcCTA.astro';
+import { ui } from '../../i18n/ui';
+const lang = 'fr';
+const t = (k: string) => ui[lang][k as keyof typeof ui.fr] ?? k;
+---
+
+<Base lang={lang} page="tools" title="Calculateur FCR (First Contact Resolution) gratuit | Opsynapse" description="Calculez votre taux de résolution au premier contact (FCR). Entrez le nombre de contacts résolus au premier appel/chat/email et le total. Outil gratuit pour managers de service client.">
+
+  <section class="page-header">
+    <div class="container">
+      <span class="hero-tag">{t('site.tagline')}</span>
+      <h1>Calculateur de FCR</h1>
+      <p class="sub">Calculez votre First Contact Resolution. Entrez le nombre de contacts résolus au premier échange et le total par canal. Obtenez votre taux et l'impact sur la charge.</p>
+    </div>
+  </section>
+
+  <section style="padding-top:24px">
+    <div class="container">
+      <div class="calc-layout">
+        <div class="calc-form">
+          <h2 class="calc-section-title">Vos données</h2>
+          <p class="calc-section-desc">Données sur une période (jour, semaine, mois) :</p>
+
+          <h3 style="margin-top:8px;color:var(--accent);font-size:1rem">Appels téléphoniques</h3>
+          <div class="calc-field">
+            <label for="call-resolved">Résolus au 1er appel</label>
+            <input type="number" id="call-resolved" min="0" value="0" />
+          </div>
+          <div class="calc-field">
+            <label for="call-total">Total des appels</label>
+            <input type="number" id="call-total" min="0" value="0" />
+          </div>
+
+          <h3 style="margin-top:16px;color:var(--accent);font-size:1rem">Chat en direct</h3>
+          <div class="calc-field">
+            <label for="chat-resolved">Résolus au 1er chat</label>
+            <input type="number" id="chat-resolved" min="0" value="0" />
+          </div>
+          <div class="calc-field">
+            <label for="chat-total">Total des chats</label>
+            <input type="number" id="chat-total" min="0" value="0" />
+          </div>
+
+          <h3 style="margin-top:16px;color:var(--accent);font-size:1rem">Tickets (email / Jira / Zendesk)</h3>
+          <div class="calc-field">
+            <label for="ticket-resolved">Résolus au 1er ticket</label>
+            <input type="number" id="ticket-resolved" min="0" value="0" />
+          </div>
+          <div class="calc-field">
+            <label for="ticket-total">Total des tickets</label>
+            <input type="number" id="ticket-total" min="0" value="0" />
+          </div>
+
+          <button id="calc-btn" class="btn btn-primary calc-btn">Calculer</button>
+        </div>
+
+        <div class="calc-result" id="result" style="display:none">
+          <div class="calc-score-block">
+            <span class="calc-score-label">FCR global</span>
+            <div class="calc-score" id="fcr-score">--</div>
+            <span class="calc-score-status" id="fcr-status">--</span>
+          </div>
+
+          <div class="calc-breakdown">
+            <h3>FCR par canal</h3>
+            <table class="calc-table">
+              <tbody>
+                <tr><td>Appels téléphoniques</td><td><strong id="r-fcr-call">--</strong></td></tr>
+                <tr><td>Chat en direct</td><td><strong id="r-fcr-chat">--</strong></td></tr>
+                <tr><td>Tickets</td><td><strong id="r-fcr-ticket">--</strong></td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="calc-breakdown">
+            <h3>Impact opérationnel</h3>
+            <table class="calc-table">
+              <tbody>
+                <tr><td>Total résolus au 1er contact</td><td><strong id="r-total-resolved">--</strong></td></tr>
+                <tr><td>Total des contacts</td><td><strong id="r-total-contacts">--</strong></td></tr>
+                <tr><td>Contacts non résolus</td><td><strong id="r-unresolved">--</strong></td></tr>
+                <tr><td>Volume évité si FCR = 100%</td><td><strong id="r-saved">--</strong> contacts</td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="calc-benchmark">
+            <h3>Interprétation</h3>
+            <p id="fcr-interpretation">--</p>
+          </div>
+
+          <div class="calc-benchmark">
+            <h3>Benchmarks FCR par canal</h3>
+            <table class="calc-table">
+              <thead>
+                <tr><th>Canal</th><th>FCR cible</th></tr>
+              </thead>
+              <tbody>
+                <tr><td>Appel téléphonique</td><td>70-80%</td></tr>
+                <tr><td>Chat en direct</td><td>60-70%</td></tr>
+                <tr><td>Email / Ticket</td><td>50-65%</td></tr>
+                <tr><td>Global (tous canaux)</td><td>65-75%</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="calc-result calc-empty" id="result-empty">
+          <p>Entrez vos chiffres et cliquez sur Calculer.</p>
+        </div>
+      </div>
+
+      <AdSlot slot="8888888888" />
+
+      <div class="calc-info">
+        <h2>Le FCR, c'est quoi ?</h2>
+        <p>Le FCR (First Contact Resolution) est le pourcentage de demandes résolues au premier échange, sans rappel ni relance. C'est l'indicateur qui impacte le plus la satisfaction et la charge de travail.</p>
+        <p>La formule : <strong>FCR = (Contacts résolus au 1er contact / Total des contacts) x 100</strong></p>
+        <p>Un FCR faible signifie que vos clients doivent vous contacter plusieurs fois pour le même problème. Ça augmente votre volume, ça coûte cher et ça frustre les clients. Chaque point de FCR gagné réduit directement la charge de l'équipe.</p>
+      </div>
+
+      <CalcCTA tool="Calculateur FCR" />
+
+      <p style="margin-top:32px"><a href="/tools" class="btn btn-ghost">← Retour aux outils</a></p>
+    </div>
+  </section>
+</Base>
+
+<script is:inline>
+  function calcFCR() {
+    const callR = parseInt(document.getElementById("call-resolved").value) || 0;
+    const callT = parseInt(document.getElementById("call-total").value) || 0;
+    const chatR = parseInt(document.getElementById("chat-resolved").value) || 0;
+    const chatT = parseInt(document.getElementById("chat-total").value) || 0;
+    const ticketR = parseInt(document.getElementById("ticket-resolved").value) || 0;
+    const ticketT = parseInt(document.getElementById("ticket-total").value) || 0;
+
+    const totalResolved = callR + chatR + ticketR;
+    const totalContacts = callT + chatT + ticketT;
+
+    if (totalContacts === 0) {
+      alert("Entrez au moins un total.");
+      return;
+    }
+
+    const fcrGlobal = (totalResolved / totalContacts) * 100;
+    const fcrCall = callT > 0 ? (callR / callT) * 100 : null;
+    const fcrChat = chatT > 0 ? (chatR / chatT) * 100 : null;
+    const fcrTicket = ticketT > 0 ? (ticketR / ticketT) * 100 : null;
+    const unresolved = totalContacts - totalResolved;
+
+    document.getElementById("fcr-score").textContent = fcrGlobal.toFixed(1) + "%";
+    document.getElementById("r-fcr-call").textContent = fcrCall !== null ? fcrCall.toFixed(1) + "%" : "N/A";
+    document.getElementById("r-fcr-chat").textContent = fcrChat !== null ? fcrChat.toFixed(1) + "%" : "N/A";
+    document.getElementById("r-fcr-ticket").textContent = fcrTicket !== null ? fcrTicket.toFixed(1) + "%" : "N/A";
+    document.getElementById("r-total-resolved").textContent = totalResolved;
+    document.getElementById("r-total-contacts").textContent = totalContacts;
+    document.getElementById("r-unresolved").textContent = unresolved;
+    document.getElementById("r-saved").textContent = unresolved;
+
+    let status, interpretation;
+    if (fcrGlobal >= 75) {
+      status = "Excellent";
+      interpretation = "Votre FCR est excellent. La majorite de vos contacts sont resolus au premier echange. Continuez a ameliorer la knowledge base et la formation pour viser 80%.";
+    } else if (fcrGlobal >= 65) {
+      status = "Bon";
+      interpretation = "Votre FCR est dans la bonne moyenne. Identifiez les types de problemes qui necessitent plusieurs contacts et ciblez la formation des agents sur ces sujets.";
+    } else if (fcrGlobal >= 50) {
+      status = "Moyen";
+      interpretation = "Votre FCR est moyen. " + unresolved + " contacts sur " + totalContacts + " necessitent un recontact. Causes probables : knowledge base incomplete, agents mal formes, ou process trop complexes.";
+    } else {
+      status = "A ameliorer";
+      interpretation = "Votre FCR est faible. Moins d'un contact sur 2 est resolu au premier echange. C'est un probleme majeur : la charge explose, les couts grimpent et la satisfaction chute. Priorite absolue.";
+    }
+
+    document.getElementById("fcr-status").textContent = status;
+    document.getElementById("fcr-interpretation").textContent = interpretation;
+    document.getElementById("result").style.display = "block";
+    document.getElementById("result-empty").style.display = "none";
+
+    const scoreColor = fcrGlobal >= 75 ? "#2e7d32" : fcrGlobal >= 65 ? "#8a6d1f" : fcrGlobal >= 50 ? "#e65100" : "#c62828";
+    document.getElementById("fcr-score").style.color = scoreColor;
+    document.getElementById("fcr-status").style.color = scoreColor;
+  }
+
+  document.getElementById("calc-btn").addEventListener("click", calcFCR);
+</script>

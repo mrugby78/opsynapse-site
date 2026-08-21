@@ -1,0 +1,83 @@
+import type { APIRoute } from 'astro';
+
+export const prerender = false;
+
+export const POST: APIRoute = async ({ request }) => {
+  const body = await request.json().catch(() => null) as {
+    name?: string;
+    email?: string;
+    company?: string;
+    subject?: string;
+    message?: string;
+    tool?: string;
+  } | null;
+
+  if (!body || !body.email || !body.message) {
+    return new Response(JSON.stringify({ error: 'Champs requis manquants' }), {
+      status: 400,
+      headers: { 'Content-Type': 'application/json' },
+    });
+  }
+
+  const RESEND_API_KEY = import.meta.env.RESEND_API_KEY;
+  const TO_EMAIL = import.meta.env.CONTACT_TO_EMAIL || 'romain.pinsard@gmail.com';
+  const FROM_EMAIL = import.meta.env.CONTACT_FROM_EMAIL || 'onboarding@resend.dev';
+
+  if (!RESEND_API_KEY) {
+    console.error('RESEND_API_KEY manquant');
+    return new Response(JSON.stringify({ error: 'Service email non configuré' }), {
+      status: 500,
+      headers: { 'Content-Type': 'application/json' },
+    });
+  }
+
+  const emailContent = `
+Nouveau message depuis opsynapse.org
+-----------------------------------
+
+De : ${body.name || 'Non précisé'} <${body.email}>
+Entreprise : ${body.company || 'Non précisée'}
+Sujet : ${body.subject || 'Demande depuis le site'}
+Provenance : ${body.tool || 'Page contact'}
+
+Message :
+${body.message}
+  `.trim();
+
+  try {
+    const res = await fetch('https://api.resend.com/emails', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${RESEND_API_KEY}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        from: FROM_EMAIL,
+        to: [TO_EMAIL],
+        reply_to: body.email,
+        subject: `[Opsynapse] ${body.subject || 'Nouveau message'} ${body.tool ? '· ' + body.tool : ''}`,
+        text: emailContent,
+      }),
+    });
+
+    if (!res.ok) {
+      const err = await res.text();
+      console.error('Resend error:', err);
+      return new Response(JSON.stringify({ error: 'Erreur envoi email' }), {
+        status: 500,
+        headers: { 'Content-Type': 'application/json' },
+      });
+    }
+
+    return new Response(JSON.stringify({ success: true }), {
+      status: 200,
+      headers: { 'Content-Type': 'application/json' },
+    });
+  } catch (e) {
+    console.error('Contact form error:', e);
+    return new Response(JSON.stringify({ error: 'Erreur serveur' }), {
+      status: 500,
+      headers: { 'Content-Type': 'application/json' },
+    });
+  }
+};
