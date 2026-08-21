@@ -27,16 +27,12 @@ export const POST: APIRoute = async (ctx) => {
   const FROM_EMAIL = env.CONTACT_FROM_EMAIL || g.CONTACT_FROM_EMAIL || (typeof process !== 'undefined' ? process.env?.CONTACT_FROM_EMAIL : undefined) || (ctx.locals as any)?.runtime?.env?.CONTACT_FROM_EMAIL || 'onboarding@resend.dev';
 
   if (!RESEND_API_KEY) {
-    const debug = {
+    return new Response(JSON.stringify({
+      error: 'RESEND_API_KEY non trouve',
       hasImportMeta: !!env.RESEND_API_KEY,
       hasGlobal: !!g.RESEND_API_KEY,
-      hasProcess: typeof process !== 'undefined' ? !!process.env?.RESEND_API_KEY : 'no process',
-      hasRuntime: !!(ctx.locals as any)?.runtime?.env?.RESEND_API_KEY,
-      importMetaKeys: Object.keys(env).filter(k => !k.startsWith('_')),
-    };
-    return new Response(JSON.stringify({
-      error: 'Service email non configuré',
-      debug
+      hasProcess: typeof process !== 'undefined' ? !!process.env?.RESEND_API_KEY : false,
+      hasRuntime: !!(ctx.locals as any)?.runtime?.env?.RESEND_API_KEY
     }), {
       status: 500,
       headers: { 'Content-Type': 'application/json' },
