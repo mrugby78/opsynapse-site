@@ -3,84 +3,69 @@ import type { APIRoute } from 'astro';
 export const prerender = false;
 
 export const POST: APIRoute = async (ctx) => {
-  const { request } = ctx;
-  const body = await request.json().catch(() => null) as {
-    name?: string;
-    email?: string;
-    company?: string;
-    subject?: string;
-    message?: string;
-    tool?: string;
-  } | null;
-
-  if (!body || !body.email || !body.message) {
-    return new Response(JSON.stringify({ error: 'Champs requis manquants' }), {
-      status: 400,
-      headers: { 'Content-Type': 'application/json' },
-    });
+  let body: any;
+  try {
+    body = await ctx.request.json();
+  } catch {
+    return json({ error: 'JSON invalide' }, 400);
   }
 
-  const env = (import.meta as any).env || {};
-  const g = (typeof globalThis !== 'undefined' ? (globalThis as any) : {});
-  const RESEND_API_KEY = env.RESEND_API_KEY || g.RESEND_API_KEY || (typeof process !== 'undefined' ? process.env?.RESEND_API_KEY : undefined) || (ctx.locals as any)?.runtime?.env?.RESEND_API_KEY;
-  const TO_EMAIL = env.CONTACT_TO_EMAIL || g.CONTACT_TO_EMAIL || (typeof process !== 'undefined' ? process.env?.CONTACT_TO_EMAIL : undefined) || (ctx.locals as any)?.runtime?.env?.CONTACT_TO_EMAIL || 'romain.pinsard@gmail.com';
-  const FROM_EMAIL = env.CONTACT_FROM_EMAIL || g.CONTACT_FROM_EMAIL || (typeof process !== 'undefined' ? process.env?.CONTACT_FROM_EMAIL : undefined) || (ctx.locals as any)?.runtime?.env?.CONTACT_FROM_EMAIL || 'onboarding@resend.dev';
-
-  if (!RESEND_API_KEY) {
-    return new Response(JSON.stringify({
-      error: 'RESEND_API_KEY non trouve',
-      hasImportMeta: !!env.RESEND_API_KEY,
-      hasGlobal: !!g.RESEND_API_KEY,
-      hasProcess: typeof process !== 'undefined' ? !!process.env?.RESEND_API_KEY : false,
-      hasRuntime: !!(ctx.locals as any)?.runtime?.env?.RESEND_API_KEY
-    }), {
-      status: 500,
-      headers: { 'Content-Type': 'application/json' },
-    });
+  if (!body?.email || !body?.message) {
+    return json({ error: 'Champs requis manquants' }, 400);
   }
 
-  const emailContent = `Nouveau message depuis opsynapse.org
+  let apiKey: string | undefined;
+  let toEmail = 'romain.pinsard@gmail.com';
 
-De : ${body.name || 'Non précisé'} <${body.email}>
-Entreprise : ${body.company || 'Non précisée'}
-Sujet : ${body.subject || 'Demande depuis le site'}
-Provenance : ${body.tool || 'Page contact'}
+  try {
+    const env = (ctx.locals as any)?.runtime?.env;
+    apiKey = env?.RESEND_API_KEY;
+    toEmail = env?.CONTACT_TO_EMAIL || toEmail;
+  } catch {}
 
-Message :
+  if (!apiKey) {
+    return json({ error: 'Config manquante' }, 500);
+  }
+
+  const text = `Nouveau message depuis opsynapse.org
+
+De: ${body.name || 'N/A'} <${body.email}>
+Entreprise: ${body.company || 'N/A'}
+Sujet: ${body.subject || 'Demande'}
+Provenance: ${body.tool || 'Contact'}
+
 ${body.message}`;
 
   try {
     const res = await fetch('https://api.resend.com/emails', {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${RESEND_API_KEY}`,
+        'Authorization': `Bearer ${apiKey}`,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        from: FROM_EMAIL,
-        to: [TO_EMAIL],
+        from: 'onboarding@resend.dev',
+        to: [toEmail],
         reply_to: body.email,
-        subject: `[Opsynapse] ${body.subject || 'Nouveau message'}${body.tool ? ' · ' + body.tool : ''}`,
-        text: emailContent,
+        subject: `[Opsynapse] ${body.subject || 'Message'}${body.tool ? ' - ' + body.tool : ''}`,
+        text,
       }),
     });
 
     if (!res.ok) {
       const err = await res.text();
-      return new Response(JSON.stringify({ error: 'Erreur envoi', detail: err }), {
-        status: 500,
-        headers: { 'Content-Type': 'application/json' },
-      });
+      return json({ error: 'Resend: ' + err }, 500);
     }
 
-    return new Response(JSON.stringify({ success: true }), {
-      status: 200,
-      headers: { 'Content-Type': 'application/json' },
-    });
+    return json({ success: true }, 200);
   } catch (e: any) {
-    return new Response(JSON.stringify({ error: 'Erreur serveur', detail: e.message }), {
-      status: 500,
-      headers: { 'Content-Type': 'application/json' },
-    });
+    return json({ error: 'Fetch: ' + e.message }, 500);
   }
 };
+
+function json(data: any, status: number) {
+  return new Response(JSON.stringify(data), {
+    status,
+    headers: { 'Content-Type': 'application/json' },
+  });
+}
