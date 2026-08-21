@@ -1,0 +1,150 @@
+---
+import Base from '../../layouts/Base.astro';
+import { ui } from '../../i18n/ui';
+const lang = 'fr';
+const t = (k: string) => ui[lang][k as keyof typeof ui.fr] ?? k;
+---
+
+<Base lang={lang} page="tools">
+  <section class="page-header">
+    <div class="container">
+      <span class="hero-tag">{t('site.tagline')}</span>
+      <h1>Calculateur d'effectifs (FTE)</h1>
+      <p class="sub">Calculez combien d'agents (FTE) vous devez mobiliser pour absorber votre volume de tickets. Entrez le volume, le temps de traitement moyen et les heures travaillées par agent.</p>
+    </div>
+  </section>
+
+  <section style="padding-top:24px">
+    <div class="container">
+      <div class="calc-layout">
+        <div class="calc-form">
+          <h2 class="calc-section-title">Vos données</h2>
+          <p class="calc-section-desc">Estimez votre besoin en effectif sur une période (mois) :</p>
+
+          <div class="calc-field">
+            <label for="volume">Volume mensuel de tickets</label>
+            <input type="number" id="volume" min="0" value="0" />
+            <span class="calc-field-hint">Nombre total de tickets par mois</span>
+          </div>
+
+          <div class="calc-field">
+            <label for="aht">Temps de traitement moyen (min)</label>
+            <input type="number" id="aht" min="0" value="5" step="0.5" />
+            <span class="calc-field-hint">Average Handling Time par ticket</span>
+          </div>
+
+          <div class="calc-field">
+            <label for="hours">Heures travaillées / agent / mois</label>
+            <input type="number" id="hours" min="0" value="151" />
+            <span class="calc-field-hint">Base 35h = 151h, 39h = 169h</span>
+          </div>
+
+          <div class="calc-field">
+            <label for="occupancy">Taux d'occupation (%)</label>
+            <input type="number" id="occupancy" min="0" max="100" value="80" />
+            <span class="calc-field-hint">Temps productif vs temps payé (souvent 70-85%)</span>
+          </div>
+
+          <button id="calc-btn" class="btn btn-primary calc-btn">Calculer</button>
+        </div>
+
+        <div class="calc-result" id="result" style="display:none">
+          <div class="calc-score-block">
+            <span class="calc-score-label">Effectif nécessaire</span>
+            <div class="calc-score" id="fte-score">--</div>
+            <span class="calc-score-status" id="fte-status">agents (FTE)</span>
+          </div>
+
+          <div class="calc-breakdown">
+            <h3>Détail du calcul</h3>
+            <table class="calc-table">
+              <tbody>
+                <tr><td>Volume mensuel</td><td><strong id="r-volume">--</strong> tickets</td></tr>
+                <tr><td>Temps de traitement total</td><td><strong id="r-total-time">--</strong> h/mois</td></tr>
+                <tr><td>Heures productives / agent</td><td><strong id="r-prod-hours">--</strong> h/mois</td></tr>
+                <tr><td>FTE nécessaires</td><td><strong id="r-fte">--</strong></td></tr>
+                <tr><td>FTE recommandé (marge 15%)</td><td><strong id="r-fte-buffer">--</strong></td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="calc-benchmark">
+            <h3>Interprétation</h3>
+            <p id="fte-interpretation">--</p>
+          </div>
+
+          <div class="calc-benchmark">
+            <h3>Benchmarks d'occupation</h3>
+            <table class="calc-table">
+              <thead>
+                <tr><th>Type de centre</th><th>Taux d'occupation optimal</th></tr>
+              </thead>
+              <tbody>
+                <tr><td>Centre d'appels entrants</td><td>70-80%</td></tr>
+                <tr><td>Support email / ticket</td><td>80-85%</td></tr>
+                <tr><td>Chat en direct</td><td>65-75%</td></tr>
+                <tr><td>Back-office</td><td>85-90%</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="calc-result calc-empty" id="result-empty">
+          <p>Entrez vos chiffres et cliquez sur Calculer.</p>
+        </div>
+      </div>
+
+      <div class="calc-info">
+        <h2>Le calcul d'effectif, c'est quoi ?</h2>
+        <p>Le calcul d'effectif (FTE = Full Time Equivalent) permet de savoir combien d'agents il faut pour traiter un volume de tickets donné. C'est la base du dimensionnement d'une équipe de service client.</p>
+        <p>La formule : <strong>FTE = (Volume x Temps moyen) / (Heures travail x Taux d'occupation)</strong></p>
+        <p>Le taux d'occupation est crucial. Un agent ne passe pas 100% de son temps à traiter des tickets. Il y a les pauses, les formations, les meetings, l'administratif. Un taux réaliste se situe entre 70 et 85%.</p>
+      </div>
+
+      <p style="margin-top:32px"><a href="/tools" class="btn btn-ghost">← Retour aux outils</a></p>
+    </div>
+  </section>
+</Base>
+
+<script is:inline>
+  function calcFTE() {
+    const volume = parseInt(document.getElementById("volume").value) || 0;
+    const aht = parseFloat(document.getElementById("aht").value) || 0;
+    const hours = parseFloat(document.getElementById("hours").value) || 0;
+    const occupancy = parseFloat(document.getElementById("occupancy").value) || 0;
+
+    if (volume === 0 || aht === 0 || hours === 0) {
+      alert("Remplissez tous les champs.");
+      return;
+    }
+
+    const totalTime = (volume * aht) / 60;
+    const prodHours = hours * (occupancy / 100);
+    const fte = totalTime / prodHours;
+    const fteBuffer = fte * 1.15;
+
+    document.getElementById("fte-score").textContent = Math.ceil(fte);
+    document.getElementById("r-volume").textContent = volume;
+    document.getElementById("r-total-time").textContent = totalTime.toFixed(0);
+    document.getElementById("r-prod-hours").textContent = prodHours.toFixed(0);
+    document.getElementById("r-fte").textContent = fte.toFixed(1);
+    document.getElementById("r-fte-buffer").textContent = Math.ceil(fteBuffer);
+
+    let interpretation;
+    if (fte < 2) {
+      interpretation = "Vous avez besoin de moins de 2 agents. L'equipe est legere. Attention aux absences et conges : un seul agent absent peut paralyser le service.";
+    } else if (fte < 5) {
+      interpretation = "Petite equipe de 2 a 5 agents. Pensez au cross-training pour couvrir les absences et prevoyez un flottant de 15%.";
+    } else if (fte < 15) {
+      interpretation = "Equipe moyenne. Le dimensionnement est coherent. Surveillez le taux d'occupation reel vs theorique pour ajuster.";
+    } else {
+      interpretation = "Grande equipe. Au-dela de 15 FTE, structurez par shifts et prevoyez un encadrement (team lead, shift leader). Le risque principal est la coherence de la qualite entre agents.";
+    }
+
+    document.getElementById("fte-interpretation").textContent = interpretation;
+    document.getElementById("result").style.display = "block";
+    document.getElementById("result-empty").style.display = "none";
+  }
+
+  document.getElementById("calc-btn").addEventListener("click", calcFTE);
+</script>

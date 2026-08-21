@@ -1,0 +1,160 @@
+---
+import Base from '../../layouts/Base.astro';
+import { ui } from '../../i18n/ui';
+const lang = 'fr';
+const t = (k: string) => ui[lang][k as keyof typeof ui.fr] ?? k;
+---
+
+<Base lang={lang} page="tools">
+  <section class="page-header">
+    <div class="container">
+      <span class="hero-tag">{t('site.tagline')}</span>
+      <h1>Calculateur de coût par ticket</h1>
+      <p class="sub">Calculez combien vous coûte chaque ticket traité. Entrez le coût total de votre équipe et le volume de tickets, obtenez le coût unitaire et comparez aux benchmarks.</p>
+    </div>
+  </section>
+
+  <section style="padding-top:24px">
+    <div class="container">
+      <div class="calc-layout">
+        <div class="calc-form">
+          <h2 class="calc-section-title">Vos données</h2>
+          <p class="calc-section-desc">Tous les coûts mensuels de votre équipe de service client :</p>
+
+          <div class="calc-field">
+            <label for="salaries">Salaires + charges (€/mois)</label>
+            <input type="number" id="salaries" min="0" value="0" />
+            <span class="calc-field-hint">Brut charges comprises</span>
+          </div>
+
+          <div class="calc-field">
+            <label for="tools">Outils et licences (€/mois)</label>
+            <input type="number" id="tools" min="0" value="0" />
+            <span class="calc-field-hint">Zendesk, Slack, phone, etc.</span>
+          </div>
+
+          <div class="calc-field">
+            <label for="other">Autres coûts (€/mois)</label>
+            <input type="number" id="other" min="0" value="0" />
+            <span class="calc-field-hint">Loyer, telecom, formation, management</span>
+          </div>
+
+          <div class="calc-field">
+            <label for="tickets">Nombre de tickets / mois</label>
+            <input type="number" id="tickets" min="0" value="0" />
+            <span class="calc-field-hint">Tous canaux confondus</span>
+          </div>
+
+          <button id="calc-btn" class="btn btn-primary calc-btn">Calculer</button>
+        </div>
+
+        <div class="calc-result" id="result" style="display:none">
+          <div class="calc-score-block">
+            <span class="calc-score-label">Coût par ticket</span>
+            <div class="calc-score" id="cpt-score">--</div>
+            <span class="calc-score-status" id="cpt-status">--</span>
+          </div>
+
+          <div class="calc-breakdown">
+            <h3>Détail des coûts</h3>
+            <table class="calc-table">
+              <tbody>
+                <tr><td>Salaires + charges</td><td><strong id="r-salaries">--</strong> €</td></tr>
+                <tr><td>Outils et licences</td><td><strong id="r-tools">--</strong> €</td></tr>
+                <tr><td>Autres coûts</td><td><strong id="r-other">--</strong> €</td></tr>
+                <tr><td>Coût total / mois</td><td><strong id="r-total">--</strong> €</td></tr>
+                <tr><td>Tickets / mois</td><td><strong id="r-tickets">--</strong></td></tr>
+                <tr><td>Coût par ticket</td><td><strong id="r-cpt">--</strong> €</td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="calc-benchmark">
+            <h3>Interprétation</h3>
+            <p id="cpt-interpretation">--</p>
+          </div>
+
+          <div class="calc-benchmark">
+            <h3>Benchmarks coût par ticket</h3>
+            <table class="calc-table">
+              <thead>
+                <tr><th>Modèle</th><th>Coût par ticket</th></tr>
+              </thead>
+              <tbody>
+                <tr><td>Support automatisé / IA</td><td>1-3 €</td></tr>
+                <tr><td>Support email / ticket</td><td>3-8 €</td></tr>
+                <tr><td>Chat en direct</td><td>5-12 €</td></tr>
+                <tr><td>Appel téléphonique</td><td>8-20 €</td></tr>
+                <tr><td>Support premium / VIP</td><td>20-50 €</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="calc-result calc-empty" id="result-empty">
+          <p>Entrez vos chiffres et cliquez sur Calculer.</p>
+        </div>
+      </div>
+
+      <div class="calc-info">
+        <h2>Le coût par ticket, c'est quoi ?</h2>
+        <p>Le coût par ticket (Cost Per Ticket) est le coût total de votre équipe divisé par le nombre de tickets traités. C'est l'indicateur clé pour piloter l'efficacité opérationnelle.</p>
+        <p>La formule : <strong>Coût par ticket = (Salaires + Outils + Autres coûts) / Nombre de tickets</strong></p>
+        <p>Pour réduire ce coût : automatisez les questions répétitives (FAQ, chatbot), optimisez le temps de traitement (AHT), et augmentez l'auto-service (help center, base de connaissances).</p>
+      </div>
+
+      <p style="margin-top:32px"><a href="/tools" class="btn btn-ghost">← Retour aux outils</a></p>
+    </div>
+  </section>
+</Base>
+
+<script is:inline>
+  function calcCPT() {
+    const salaries = parseFloat(document.getElementById("salaries").value) || 0;
+    const tools = parseFloat(document.getElementById("tools").value) || 0;
+    const other = parseFloat(document.getElementById("other").value) || 0;
+    const tickets = parseInt(document.getElementById("tickets").value) || 0;
+
+    if (tickets === 0) {
+      alert("Entrez un nombre de tickets.");
+      return;
+    }
+
+    const total = salaries + tools + other;
+    const cpt = total / tickets;
+
+    document.getElementById("cpt-score").textContent = cpt.toFixed(2) + " €";
+    document.getElementById("r-salaries").textContent = salaries.toLocaleString("fr-FR");
+    document.getElementById("r-tools").textContent = tools.toLocaleString("fr-FR");
+    document.getElementById("r-other").textContent = other.toLocaleString("fr-FR");
+    document.getElementById("r-total").textContent = total.toLocaleString("fr-FR");
+    document.getElementById("r-tickets").textContent = tickets.toLocaleString("fr-FR");
+    document.getElementById("r-cpt").textContent = cpt.toFixed(2) + " €";
+
+    let status, interpretation;
+    if (cpt < 3) {
+      status = "Très efficace";
+      interpretation = "Votre cout par ticket est tres bas. Vous etes probablement dans un modele hautement automatise. Attention a ne pas sacrifier la qualite pour le cout.";
+    } else if (cpt < 8) {
+      status = "Efficace";
+      interpretation = "Votre cout par ticket est dans la fourchette efficace. Bon equilibre entre cout et qualite. Cherchez a automatiser plus pour passer sous 5 €.";
+    } else if (cpt < 15) {
+      status = "Standard";
+      interpretation = "Votre cout par ticket est dans la moyenne. Il y a de la marge. Identifiez les types de tickets les plus couteux et automatisez-les en priorite.";
+    } else {
+      status = "A optimiser";
+      interpretation = "Votre cout par ticket est eleve. Causes probables : trop de calls vs emails, faible automatisation, temps de traitement long. Cible : passer sous 10 € via self-service et IA.";
+    }
+
+    document.getElementById("cpt-status").textContent = status;
+    document.getElementById("cpt-interpretation").textContent = interpretation;
+    document.getElementById("result").style.display = "block";
+    document.getElementById("result-empty").style.display = "none";
+
+    const scoreColor = cpt < 3 ? "#2e7d32" : cpt < 8 ? "#8a6d1f" : cpt < 15 ? "#e65100" : "#c62828";
+    document.getElementById("cpt-score").style.color = scoreColor;
+    document.getElementById("cpt-status").style.color = scoreColor;
+  }
+
+  document.getElementById("calc-btn").addEventListener("click", calcCPT);
+</script>

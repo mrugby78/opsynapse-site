@@ -1,0 +1,156 @@
+---
+import Base from '../../layouts/Base.astro';
+import { ui } from '../../i18n/ui';
+const lang = 'fr';
+const t = (k: string) => ui[lang][k as keyof typeof ui.fr] ?? k;
+---
+
+<Base lang={lang} page="tools">
+  <section class="page-header">
+    <div class="container">
+      <span class="hero-tag">{t('site.tagline')}</span>
+      <h1>Calculateur d'impact churn</h1>
+      <p class="sub">Calculez l'impact financier de votre churn. Entrez votre nombre de clients, votre taux de churn et le revenu moyen par client. Visualisez l'argent perdu et l'impact d'une réduction.</p>
+    </div>
+  </section>
+
+  <section style="padding-top:24px">
+    <div class="container">
+      <div class="calc-layout">
+        <div class="calc-form">
+          <h2 class="calc-section-title">Vos données</h2>
+          <p class="calc-section-desc">Données sur votre base de clients :</p>
+
+          <div class="calc-field">
+            <label for="clients">Nombre de clients actifs</label>
+            <input type="number" id="clients" min="0" value="0" />
+            <span class="calc-field-hint">Base totale</span>
+          </div>
+
+          <div class="calc-field">
+            <label for="churn">Taux de churn mensuel (%)</label>
+            <input type="number" id="churn" min="0" max="100" value="0" step="0.1" />
+            <span class="calc-field-hint">Ex : 2% = vous perdez 2% de vos clients par mois</span>
+          </div>
+
+          <div class="calc-field">
+            <label for="arpu">Revenu moyen / client / mois (€)</label>
+            <input type="number" id="arpu" min="0" value="0" />
+            <span class="calc-field-hint">ARPU (Average Revenue Per User)</span>
+          </div>
+
+          <button id="calc-btn" class="btn btn-primary calc-btn">Calculer</button>
+        </div>
+
+        <div class="calc-result" id="result" style="display:none">
+          <div class="calc-score-block">
+            <span class="calc-score-label">CA perdu / mois</span>
+            <div class="calc-score" id="churn-score">--</div>
+            <span class="calc-score-status" id="churn-status">--</span>
+          </div>
+
+          <div class="calc-breakdown">
+            <h3>Impact détaillé</h3>
+            <table class="calc-table">
+              <tbody>
+                <tr><td>Clients perdus / mois</td><td><strong id="r-lost">--</strong></td></tr>
+                <tr><td>CA perdu / mois</td><td><strong id="r-month">--</strong> €</td></tr>
+                <tr><td>CA perdu / an</td><td><strong id="r-year">--</strong> €</td></tr>
+                <tr><td>Si churn baisse de 1 point</td><td><strong id="r-save">--</strong> €/an</td></tr>
+                <tr><td>Si churn baisse de 50%</td><td><strong id="r-save50">--</strong> €/an</td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="calc-benchmark">
+            <h3>Interprétation</h3>
+            <p id="churn-interpretation">--</p>
+          </div>
+
+          <div class="calc-benchmark">
+            <h3>Benchmarks churn par secteur</h3>
+            <table class="calc-table">
+              <thead>
+                <tr><th>Secteur</th><th>Churn mensuel type</th></tr>
+              </thead>
+              <tbody>
+                <tr><td>SaaS B2B</td><td>1-2%</td></tr>
+                <tr><td>SaaS B2C</td><td>3-8%</td></tr>
+                <tr><td>Mobile app</td><td>5-10%</td></tr>
+                <tr><td>E-commerce</td><td>Non applicable (transactionnel)</td></tr>
+                <tr><td>Abonnement média</td><td>2-5%</td></tr>
+                <tr><td>Fintech</td><td>1-3%</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="calc-result calc-empty" id="result-empty">
+          <p>Entrez vos chiffres et cliquez sur Calculer.</p>
+        </div>
+      </div>
+
+      <div class="calc-info">
+        <h2>Le churn, c'est quoi ?</h2>
+        <p>Le churn (taux d'attrition) est le pourcentage de clients qui arrêtent d'utiliser votre service sur une période. C'est l'indicateur de santé numéro 1 d'un business récurrent.</p>
+        <p>La formule : <strong>Churn mensuel = (clients perdus dans le mois / clients en début de mois) x 100</strong></p>
+        <p>Réduire le churn de 1 point peut représenter des milliers d'euros. Un client conservé coûte 5 à 7 fois moins cher qu'un client acquis. C'est pour ça que le Customer Success existe.</p>
+      </div>
+
+      <p style="margin-top:32px"><a href="/tools" class="btn btn-ghost">← Retour aux outils</a></p>
+    </div>
+  </section>
+</Base>
+
+<script is:inline>
+  function calcChurn() {
+    const clients = parseInt(document.getElementById("clients").value) || 0;
+    const churn = parseFloat(document.getElementById("churn").value) || 0;
+    const arpu = parseFloat(document.getElementById("arpu").value) || 0;
+
+    if (clients === 0) {
+      alert("Entrez votre nombre de clients.");
+      return;
+    }
+
+    const lostClients = Math.round(clients * (churn / 100));
+    const monthLoss = lostClients * arpu;
+    const yearLoss = monthLoss * 12;
+    const newChurn = churn - 1;
+    const saveYear = newChurn > 0 ? Math.round(clients * (1 / 100) * arpu * 12) : monthLoss * 12;
+    const save50 = Math.round(yearLoss * 0.5);
+
+    document.getElementById("churn-score").textContent = monthLoss.toLocaleString("fr-FR") + " €";
+    document.getElementById("r-lost").textContent = lostClients;
+    document.getElementById("r-month").textContent = monthLoss.toLocaleString("fr-FR");
+    document.getElementById("r-year").textContent = yearLoss.toLocaleString("fr-FR");
+    document.getElementById("r-save").textContent = saveYear.toLocaleString("fr-FR");
+    document.getElementById("r-save50").textContent = save50.toLocaleString("fr-FR");
+
+    let status, interpretation;
+    if (churn <= 2) {
+      status = "Excellent";
+      interpretation = "Votre churn est faible. Votre base est solide. Concentrez-vous sur l'acquisition pour accelerer la croissance sans casser la retention.";
+    } else if (churn <= 5) {
+      status = "Correct";
+      interpretation = "Votre churn est dans la moyenne acceptable mais il y a de la marge. Identifiez les cohorts de clients qui churnent le plus et agissez specifiquement sur elles.";
+    } else if (churn <= 10) {
+      status = "Preoccupant";
+      interpretation = "Votre churn est eleve. Vous perdez pres de " + lostClients + " clients par mois. Le remedier est urgent : analyse les raisons de depart et mettez en place un process de retention (onboarding, CS, NPS).";
+    } else {
+      status = "Critique";
+      interpretation = "Votre churn est critique. Votre business est une passoire. Avant d'investir en acquisition, fixez la retention. Un client acquis qui part en 2 mois ne rapporte rien.";
+    }
+
+    document.getElementById("churn-status").textContent = status;
+    document.getElementById("churn-interpretation").textContent = interpretation;
+    document.getElementById("result").style.display = "block";
+    document.getElementById("result-empty").style.display = "none";
+
+    const scoreColor = churn <= 2 ? "#2e7d32" : churn <= 5 ? "#8a6d1f" : churn <= 10 ? "#e65100" : "#c62828";
+    document.getElementById("churn-score").style.color = scoreColor;
+    document.getElementById("churn-status").style.color = scoreColor;
+  }
+
+  document.getElementById("calc-btn").addEventListener("click", calcChurn);
+</script>

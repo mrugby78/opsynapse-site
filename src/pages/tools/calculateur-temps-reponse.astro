@@ -1,0 +1,172 @@
+---
+import Base from '../../layouts/Base.astro';
+import { ui } from '../../i18n/ui';
+const lang = 'fr';
+const t = (k: string) => ui[lang][k as keyof typeof ui.fr] ?? k;
+---
+
+<Base lang={lang} page="tools">
+  <section class="page-header">
+    <div class="container">
+      <span class="hero-tag">{t('site.tagline')}</span>
+      <h1>Calculateur de temps de réponse moyen</h1>
+      <p class="sub">Calculez votre temps de réponse moyen (First Response Time). Entrez le nombre de tickets et le temps total de réponse, comparez aux standards par canal.</p>
+    </div>
+  </section>
+
+  <section style="padding-top:24px">
+    <div class="container">
+      <div class="calc-layout">
+        <div class="calc-form">
+          <h2 class="calc-section-title">Vos données</h2>
+          <p class="calc-section-desc">Données sur une période (jour, semaine, mois) :</p>
+
+          <div class="calc-field">
+            <label for="nbr-tickets">Nombre de tickets</label>
+            <input type="number" id="nbr-tickets" min="0" value="0" />
+            <span class="calc-field-hint">Tous les tickets de la période</span>
+          </div>
+
+          <div class="calc-field">
+            <label for="total-minutes">Temps total de réponse (min)</label>
+            <input type="number" id="total-minutes" min="0" value="0" />
+            <span class="calc-field-hint">Somme des temps de première réponse</span>
+          </div>
+
+          <div class="calc-field">
+            <label for="channel">Canal principal</label>
+            <select id="channel">
+              <option value="chat">Chat en direct</option>
+              <option value="phone">Appel téléphonique</option>
+              <option value="email">Email</option>
+              <option value="ticket">Ticket (Jira / Zendesk)</option>
+            </select>
+            <span class="calc-field-hint">Pour comparer aux standards du canal</span>
+          </div>
+
+          <button id="calc-btn" class="btn btn-primary calc-btn">Calculer</button>
+        </div>
+
+        <div class="calc-result" id="result" style="display:none">
+          <div class="calc-score-block">
+            <span class="calc-score-label">Temps de réponse moyen</span>
+            <div class="calc-score" id="frt-score">--</div>
+            <span class="calc-score-status" id="frt-status">--</span>
+          </div>
+
+          <div class="calc-breakdown">
+            <h3>Détail</h3>
+            <table class="calc-table">
+              <tbody>
+                <tr><td>Nombre de tickets</td><td><strong id="r-nbr">--</strong></td></tr>
+                <tr><td>Temps total</td><td><strong id="r-total-time">--</strong> min</td></tr>
+                <tr><td>Temps moyen</td><td><strong id="r-avg">--</strong> min</td></tr>
+                <tr><td>Standard du canal</td><td><strong id="r-standard">--</strong></td></tr>
+                <tr><td>Écart vs standard</td><td><strong id="r-gap">--</strong></td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="calc-benchmark">
+            <h3>Interprétation</h3>
+            <p id="frt-interpretation">--</p>
+          </div>
+
+          <div class="calc-benchmark">
+            <h3>Standards par canal</h3>
+            <table class="calc-table">
+              <thead>
+                <tr><th>Canal</th><th>Standard First Response Time</th></tr>
+              </thead>
+              <tbody>
+                <tr><td>Chat en direct</td><td>Moins de 2 min</td></tr>
+                <tr><td>Appel téléphonique</td><td>Moins de 60 s</td></tr>
+                <tr><td>Email</td><td>Moins de 4 h</td></tr>
+                <tr><td>Ticket (Jira / Zendesk)</td><td>Moins de 24 h</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="calc-result calc-empty" id="result-empty">
+          <p>Entrez vos chiffres et cliquez sur Calculer.</p>
+        </div>
+      </div>
+
+      <div class="calc-info">
+        <h2>Le temps de réponse, c'est quoi ?</h2>
+        <p>Le First Response Time (FRT) est le temps écoulé entre la réception d'une demande client et la première réponse apportée. C'est l'indicateur qui impacte le plus la satisfaction immédiate.</p>
+        <p>La formule : <strong>FRT moyen = Temps total de réponse / Nombre de tickets</strong></p>
+        <p>Un client qui attend 30 min pour une réponse simple a déjà une mauvaise impression, même si la réponse est parfaite. La vitesse perdue ne se rattrape pas.</p>
+      </div>
+
+      <p style="margin-top:32px"><a href="/tools" class="btn btn-ghost">← Retour aux outils</a></p>
+    </div>
+  </section>
+</Base>
+
+<script is:inline>
+  function calcFRT() {
+    const nbr = parseInt(document.getElementById("nbr-tickets").value) || 0;
+    const totalMin = parseFloat(document.getElementById("total-minutes").value) || 0;
+    const channel = document.getElementById("channel").value;
+
+    if (nbr === 0) {
+      alert("Entrez un nombre de tickets.");
+      return;
+    }
+
+    const avg = totalMin / nbr;
+    const standards = { chat: 2, phone: 1, email: 240, ticket: 1440 };
+    const standardLabels = { chat: "2 min", phone: "60 sec", email: "4 h", ticket: "24 h" };
+    const standard = standards[channel];
+    const label = standardLabels[channel];
+
+    let display;
+    if (avg < 60) {
+      display = avg.toFixed(1) + " min";
+    } else if (avg < 1440) {
+      display = (avg / 60).toFixed(1) + " h";
+    } else {
+      display = (avg / 1440).toFixed(1) + " j";
+    }
+
+    document.getElementById("frt-score").textContent = display;
+    document.getElementById("r-nbr").textContent = nbr;
+    document.getElementById("r-total-time").textContent = totalMin.toLocaleString("fr-FR") + " min";
+    document.getElementById("r-avg").textContent = avg.toFixed(1) + " min";
+    document.getElementById("r-standard").textContent = label;
+
+    const gap = avg - standard;
+    let gapDisplay;
+    if (gap < 0) {
+      gapDisplay = (gap * -1).toFixed(1) + " min plus rapide";
+    } else {
+      gapDisplay = "+" + gap.toFixed(1) + " min plus lent";
+    }
+    document.getElementById("r-gap").textContent = gapDisplay;
+
+    let status, interpretation;
+    if (avg <= standard) {
+      status = "Conforme";
+      interpretation = "Votre temps de reponse est conforme au standard de ce canal. Les clients ne sont pas en attente. Maintenez ce niveau.";
+    } else if (avg <= standard * 2) {
+      status = "A ameliorer";
+      interpretation = "Votre temps de reponse est " + gapDisplay + " vs le standard. Identifiez les creneaux ou le volume depasse la capacite et ajustez les shifts.";
+    } else {
+      status = "Non conforme";
+      interpretation = "Votre temps de reponse est nettement au-dessus du standard. Cause probable : sous-effectif, mauvaise priorisation, ou process trop long. C'est un risque direct pour la satisfaction.";
+    }
+
+    document.getElementById("frt-status").textContent = status;
+    document.getElementById("frt-interpretation").textContent = interpretation;
+    document.getElementById("result").style.display = "block";
+    document.getElementById("result-empty").style.display = "none";
+
+    const scoreColor = avg <= standard ? "#2e7d32" : avg <= standard * 2 ? "#e65100" : "#c62828";
+    document.getElementById("frt-score").style.color = scoreColor;
+    document.getElementById("frt-status").style.color = scoreColor;
+  }
+
+  document.getElementById("calc-btn").addEventListener("click", calcFRT);
+</script>
