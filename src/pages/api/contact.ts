@@ -2,7 +2,7 @@ import type { APIRoute } from 'astro';
 
 export const prerender = false;
 
-export const POST: APIRoute = async ({ request }) => {
+export const POST: APIRoute = async ({ request, locals }) => {
   const body = await request.json().catch(() => null) as {
     name?: string;
     email?: string;
@@ -19,9 +19,10 @@ export const POST: APIRoute = async ({ request }) => {
     });
   }
 
-  const RESEND_API_KEY = import.meta.env.RESEND_API_KEY;
-  const TO_EMAIL = import.meta.env.CONTACT_TO_EMAIL || 'romain.pinsard@gmail.com';
-  const FROM_EMAIL = import.meta.env.CONTACT_FROM_EMAIL || 'onboarding@resend.dev';
+  const runtime = (locals as any).runtime;
+  const RESEND_API_KEY = runtime?.env?.RESEND_API_KEY;
+  const TO_EMAIL = runtime?.env?.CONTACT_TO_EMAIL || 'romain.pinsard@gmail.com';
+  const FROM_EMAIL = runtime?.env?.CONTACT_FROM_EMAIL || 'onboarding@resend.dev';
 
   if (!RESEND_API_KEY) {
     console.error('RESEND_API_KEY manquant');
