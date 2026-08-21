@@ -9,7 +9,7 @@ const { lang, page, title, description } = Astro.props;
 const t = (key: string) => ui[lang][key as keyof typeof ui.fr] ?? key;
 const pageTitle = title ?? `${t('site.name')} · ${t('site.tagline')}`;
 const pageDesc = description ?? t('hero.subtitle');
-const ADSENSE_ID = 'ca-pub-XXXXXXXXXXXXXXXX';
+const ADSENSE_ID = 'ca-pub-7135321067279537';
 const adsenseActive = !ADSENSE_ID.includes('XXXXX');
 ---
 <!doctype html>
