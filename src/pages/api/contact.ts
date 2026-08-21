@@ -1,4 +1,5 @@
 import type { APIRoute } from 'astro';
+import { env } from 'cloudflare:workers';
 
 export const prerender = false;
 
@@ -14,14 +15,8 @@ export const POST: APIRoute = async (ctx) => {
     return json({ error: 'Champs requis manquants' }, 400);
   }
 
-  let apiKey: string | undefined;
-  let toEmail = 'romain.pinsard@gmail.com';
-
-  try {
-    const env = (ctx.locals as any)?.runtime?.env;
-    apiKey = env?.RESEND_API_KEY;
-    toEmail = env?.CONTACT_TO_EMAIL || toEmail;
-  } catch {}
+  const apiKey = (env as any)?.RESEND_API_KEY as string | undefined;
+  const toEmail = ((env as any)?.CONTACT_TO_EMAIL as string) || 'romain.pinsard@gmail.com';
 
   if (!apiKey) {
     return json({ error: 'Config manquante' }, 500);
