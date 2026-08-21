@@ -16,7 +16,7 @@ export const POST: APIRoute = async (ctx) => {
   }
 
   const apiKey = (env as any)?.RESEND_API_KEY as string | undefined;
-  const toEmail = ((env as any)?.CONTACT_TO_EMAIL as string) || 'romain.pinsard@gmail.com';
+  const toEmail = ((env as any)?.CONTACT_TO_EMAIL as string) || 'romainpinsardpro@gmail.com';
 
   if (!apiKey) {
     return json({ error: 'Config manquante' }, 500);
